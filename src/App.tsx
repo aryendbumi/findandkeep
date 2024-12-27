@@ -8,6 +8,7 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Index from "./pages/Index";
 import MyBookings from "./pages/MyBookings";
+import BookedRooms from "./pages/BookedRooms";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,9 @@ const App = () => (
                 <div className="flex gap-4">
                   <Link to="/" className="text-sm font-medium hover:text-primary">
                     Available Rooms
+                  </Link>
+                  <Link to="/booked-rooms" className="text-sm font-medium hover:text-primary">
+                    Booked Rooms
                   </Link>
                   <Link to="/my-bookings" className="text-sm font-medium hover:text-primary">
                     My Bookings
@@ -71,6 +75,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/my-bookings" element={<MyBookings />} />
+              <Route path="/booked-rooms" element={<BookedRooms />} />
             </Routes>
           </main>
 

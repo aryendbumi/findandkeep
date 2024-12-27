@@ -11,9 +11,10 @@ import { useToast } from "@/components/ui/use-toast";
 interface BookingFormProps {
   roomName: string;
   capacity: number;
+  onClose?: () => void;
 }
 
-export function BookingForm({ roomName, capacity }: BookingFormProps) {
+export function BookingForm({ roomName, capacity, onClose }: BookingFormProps) {
   const [date, setDate] = useState<Date>();
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
@@ -37,10 +38,26 @@ export function BookingForm({ roomName, capacity }: BookingFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!date || !startTime || !endTime || !agenda || !attendees || !priority) {
+      toast({
+        variant: "destructive",
+        title: "Missing Required Fields",
+        description: "Please fill in all required fields before booking.",
+      });
+      return;
+    }
+
     toast({
       title: "Room Booked!",
       description: `You have successfully booked ${roomName} for ${date?.toLocaleDateString()}`,
     });
+
+    // Close the form after successful booking
+    if (onClose) {
+      onClose();
+    }
   };
 
   return (
@@ -51,54 +68,59 @@ export function BookingForm({ roomName, capacity }: BookingFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label>Select Date</Label>
+        <Label>Select Date <span className="text-red-500">*</span></Label>
         <Calendar
           mode="single"
           selected={date}
           onSelect={setDate}
           className="rounded-md border"
+          required
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="startTime">Start Time</Label>
+          <Label htmlFor="startTime">Start Time <span className="text-red-500">*</span></Label>
           <Input
             id="startTime"
             type="time"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
+            required
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="endTime">End Time</Label>
+          <Label htmlFor="endTime">End Time <span className="text-red-500">*</span></Label>
           <Input
             id="endTime"
             type="time"
             value={endTime}
             onChange={(e) => setEndTime(e.target.value)}
+            required
           />
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="agenda">Topic/Agenda</Label>
+        <Label htmlFor="agenda">Topic/Agenda <span className="text-red-500">*</span></Label>
         <Input
           id="agenda"
           value={agenda}
           onChange={(e) => setAgenda(e.target.value)}
           placeholder="Enter meeting agenda"
+          required
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="attendees">Number of Attendees</Label>
+        <Label htmlFor="attendees">Number of Attendees <span className="text-red-500">*</span></Label>
         <Input
           id="attendees"
           type="number"
           value={attendees}
           onChange={(e) => setAttendees(e.target.value)}
           max={capacity}
+          required
         />
       </div>
 
@@ -121,8 +143,8 @@ export function BookingForm({ roomName, capacity }: BookingFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label>Priority</Label>
-        <RadioGroup onValueChange={setPriority} value={priority}>
+        <Label>Priority <span className="text-red-500">*</span></Label>
+        <RadioGroup onValueChange={setPriority} value={priority} required>
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="1" id="p1" />
             <Label htmlFor="p1">Priority 1</Label>
