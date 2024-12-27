@@ -2,17 +2,19 @@ import { Calendar, Users, Wifi, Coffee, Tv } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
+import { BookingForm } from "./BookingForm";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 interface RoomCardProps {
   name: string;
   description: string;
   capacity: number;
-  pricePerHour: number;
   imageUrl: string;
   amenities: string[];
 }
 
-export function RoomCard({ name, description, capacity, pricePerHour, imageUrl, amenities }: RoomCardProps) {
+export function RoomCard({ name, description, capacity, imageUrl, amenities }: RoomCardProps) {
   const amenityIcons = {
     wifi: <Wifi className="amenity-icon" />,
     coffee: <Coffee className="amenity-icon" />,
@@ -49,12 +51,15 @@ export function RoomCard({ name, description, capacity, pricePerHour, imageUrl, 
           ))}
         </div>
       </CardContent>
-      <CardFooter className="flex justify-between items-center">
-        <div className="flex items-baseline gap-1">
-          <span className="text-lg font-bold">${pricePerHour}</span>
-          <span className="text-muted-foreground">/hour</span>
-        </div>
-        <Button>Book Now</Button>
+      <CardFooter className="flex justify-end">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button>Book Now</Button>
+          </SheetTrigger>
+          <SheetContent className="overflow-y-auto">
+            <BookingForm roomName={name} capacity={capacity} />
+          </SheetContent>
+        </Sheet>
       </CardFooter>
     </Card>
   );
