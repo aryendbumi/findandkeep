@@ -9,13 +9,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export function RoomFilter() {
+interface RoomFilterProps {
+  onSearchChange: (value: string) => void;
+  onCapacityChange: (value: string) => void;
+}
+
+export function RoomFilter({ onSearchChange, onCapacityChange }: RoomFilterProps) {
   return (
     <div className="flex flex-col md:flex-row gap-4 p-4 bg-white rounded-lg shadow-sm">
       <div className="flex-1">
-        <Input placeholder="Search rooms..." className="w-full" />
+        <Input 
+          placeholder="Search rooms..." 
+          className="w-full"
+          onChange={(e) => onSearchChange(e.target.value)}
+        />
       </div>
-      <Select defaultValue="any">
+      <Select 
+        defaultValue="any"
+        onValueChange={onCapacityChange}
+      >
         <SelectTrigger className="w-full md:w-[180px]">
           <SelectValue placeholder="Capacity" />
         </SelectTrigger>

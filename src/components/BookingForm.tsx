@@ -19,6 +19,7 @@ export function BookingForm({ roomName, capacity }: BookingFormProps) {
   const [endTime, setEndTime] = useState("");
   const [agenda, setAgenda] = useState("");
   const [needsZoom, setNeedsZoom] = useState(false);
+  const [isExternal, setIsExternal] = useState(false);
   const [attendees, setAttendees] = useState("");
   const [priority, setPriority] = useState("");
   const { toast } = useToast();
@@ -36,7 +37,6 @@ export function BookingForm({ roomName, capacity }: BookingFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically save the booking to your backend
     toast({
       title: "Room Booked!",
       description: `You have successfully booked ${roomName} for ${date?.toLocaleDateString()}`,
@@ -111,6 +111,15 @@ export function BookingForm({ roomName, capacity }: BookingFormProps) {
         <Label htmlFor="zoom">Need Zoom Meeting?</Label>
       </div>
 
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="external"
+          checked={isExternal}
+          onCheckedChange={setIsExternal}
+        />
+        <Label htmlFor="external">External Meeting</Label>
+      </div>
+
       <div className="space-y-2">
         <Label>Priority</Label>
         <RadioGroup onValueChange={setPriority} value={priority}>
@@ -130,8 +139,8 @@ export function BookingForm({ roomName, capacity }: BookingFormProps) {
       </div>
 
       {getPriorityWarning(priority) && (
-        <Alert>
-          <AlertDescription>
+        <Alert className="bg-red-50 border-red-100">
+          <AlertDescription className="text-red-600">
             {getPriorityWarning(priority)}
           </AlertDescription>
         </Alert>
