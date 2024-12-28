@@ -90,13 +90,13 @@ const Login = () => {
                   fontSize: '0.875rem',
                   fontWeight: '500',
                   opacity: '1',
-                  transition: 'opacity 0.2s',
+                  transition: 'all 0.2s',
                 },
                 anchor: { 
                   color: 'hsl(var(--primary))',
                   fontSize: '0.875rem',
                   textDecoration: 'none',
-                  transition: 'opacity 0.2s',
+                  transition: 'all 0.2s',
                 },
                 container: { 
                   width: '100%',
