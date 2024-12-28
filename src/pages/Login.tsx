@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
-import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
-import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Confetti } from "@/components/ui/confetti";
 import type { ConfettiRef } from "@/components/ui/confetti";
@@ -24,20 +22,9 @@ const Login = () => {
 
     checkUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
-        if (event === 'SIGNED_UP') {
-          confettiRef.current?.fire({
-            spread: 360,
-            startVelocity: 30,
-            particleCount: 150,
-            decay: 0.95
-          });
-          // Give time for confetti before navigation
-          setTimeout(() => navigate("/"), 1500);
-        } else {
-          navigate("/");
-        }
+        navigate("/");
       }
     });
 
