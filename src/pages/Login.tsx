@@ -3,11 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/use-toast";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [view, setView] = useState<"sign_in" | "sign_up">("sign_in");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -43,14 +42,37 @@ const Login = () => {
     );
   }
 
+  const handleAuthError = (error: Error) => {
+    console.error("Auth error:", error);
+    if (error.message.includes("User already registered")) {
+      toast({
+        title: "Account exists",
+        description: "This email is already registered. Please sign in instead.",
+        variant: "destructive",
+      });
+    } else if (error.message.includes("Database error")) {
+      toast({
+        title: "System error",
+        description: "There was an issue with the authentication system. Please try again later.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-foreground">
-          Find And Keep Your Room, Now
+          Welcome Back
         </h2>
         <p className="mt-2 text-center text-sm text-muted-foreground">
-          {view === "sign_in" ? "Sign in to your account" : "Create your account"}
+          Sign in to your account or create a new one
         </p>
       </div>
 
@@ -58,7 +80,6 @@ const Login = () => {
         <div className="bg-card py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <Auth
             supabaseClient={supabase}
-            view={view}
             appearance={{ 
               theme: ThemeSupa,
               style: {
@@ -117,14 +138,6 @@ const Login = () => {
             theme="default"
             providers={[]}
             redirectTo={window.location.origin}
-            onError={(error) => {
-              if (error.message.includes("User already registered")) {
-                toast.error("This email is already registered. Please sign in instead.");
-                setView("sign_in");
-              } else {
-                toast.error(error.message);
-              }
-            }}
           />
         </div>
       </div>
