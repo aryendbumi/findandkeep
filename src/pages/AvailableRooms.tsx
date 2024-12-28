@@ -7,6 +7,8 @@ import { toast } from "@/components/ui/use-toast";
 const AvailableRooms = () => {
   const [rooms, setRooms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [capacityFilter, setCapacityFilter] = useState("any");
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -36,6 +38,35 @@ const AvailableRooms = () => {
     fetchRooms();
   }, []);
 
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+  };
+
+  const handleCapacityChange = (value: string) => {
+    setCapacityFilter(value);
+  };
+
+  const filteredRooms = rooms.filter(room => {
+    const matchesSearch = room.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         room.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    if (!matchesSearch) return false;
+
+    if (capacityFilter === "any") return true;
+    
+    const capacity = room.capacity;
+    switch (capacityFilter) {
+      case "1-4":
+        return capacity >= 1 && capacity <= 4;
+      case "5-8":
+        return capacity >= 5 && capacity <= 8;
+      case "9+":
+        return capacity >= 9;
+      default:
+        return true;
+    }
+  });
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -56,17 +87,27 @@ const AvailableRooms = () => {
       <div className="flex flex-col gap-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Available Rooms</h1>
-          <RoomFilter />
+          <RoomFilter 
+            onSearchChange={handleSearchChange}
+            onCapacityChange={handleCapacityChange}
+          />
         </div>
         
-        {rooms.length === 0 ? (
+        {filteredRooms.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground">No rooms available at the moment.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {rooms.map((room) => (
-              <RoomCard key={room.id} room={room} />
+            {filteredRooms.map((room) => (
+              <RoomCard 
+                key={room.id}
+                name={room.name}
+                description={room.description || ""}
+                capacity={room.capacity}
+                image_url={room.image_url || ""}
+                amenities={room.amenities || []}
+              />
             ))}
           </div>
         )}
