@@ -91,7 +91,7 @@ const Login = () => {
                   fontWeight: '500',
                   opacity: '1',
                   transition: 'opacity 0.2s',
-                  '&:hover': {
+                  "&:hover": {
                     opacity: '0.9',
                   },
                 },
@@ -100,7 +100,7 @@ const Login = () => {
                   fontSize: '0.875rem',
                   textDecoration: 'none',
                   transition: 'opacity 0.2s',
-                  '&:hover': {
+                  "&:hover": {
                     opacity: '0.8',
                   },
                 },
