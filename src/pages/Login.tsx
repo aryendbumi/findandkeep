@@ -53,7 +53,7 @@ const Login = () => {
     <div className="min-h-screen bg-background flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-foreground">
-          Welcome Back
+          Welcome to MeetSpace
         </h2>
         <p className="mt-2 text-center text-sm text-muted-foreground">
           Sign in to your account or create a new one
@@ -61,7 +61,7 @@ const Login = () => {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-card py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="bg-card py-8 px-4 shadow-lg sm:rounded-lg sm:px-10 border">
           <Auth
             supabaseClient={supabase}
             appearance={{ 
@@ -75,10 +75,17 @@ const Login = () => {
                   height: '2.5rem',
                   fontSize: '0.875rem',
                   fontWeight: '500',
+                  '&:hover': {
+                    opacity: '0.9',
+                  },
                 },
                 anchor: { 
                   color: 'hsl(var(--primary))',
                   fontSize: '0.875rem',
+                  '&:hover': {
+                    opacity: '0.8',
+                    textDecoration: 'underline',
+                  },
                 },
                 container: { 
                   width: '100%',
@@ -89,6 +96,10 @@ const Login = () => {
                   backgroundColor: 'hsl(var(--background))',
                   height: '2.5rem',
                   fontSize: '0.875rem',
+                  '&:focus': {
+                    borderColor: 'hsl(var(--ring))',
+                    boxShadow: '0 0 0 1px hsl(var(--ring))',
+                  },
                 },
                 message: { 
                   color: 'hsl(var(--destructive))',
