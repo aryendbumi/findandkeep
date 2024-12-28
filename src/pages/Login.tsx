@@ -14,7 +14,7 @@ const Login = () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
-          navigate("/");
+          navigate("/dashboard");
         }
       } catch (error) {
         console.error("Error checking auth status:", error);
@@ -32,7 +32,7 @@ const Login = () => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
-        navigate("/");
+        navigate("/dashboard");
       } else if (event === 'SIGNED_OUT') {
         navigate("/login");
       }
