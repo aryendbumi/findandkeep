@@ -17,25 +17,31 @@ export function BookingTimeInputs({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
-        <Label htmlFor="startTime">Start Time <span className="text-red-500">*</span></Label>
+        <Label htmlFor="startTime">Start Time (24-hour) <span className="text-red-500">*</span></Label>
         <Input
           id="startTime"
           type="time"
           value={startTime}
           onChange={(e) => onStartTimeChange(e.target.value)}
           required
-          className="w-full"
+          className="w-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-datetime-edit-ampm-field]:hidden [&::-webkit-inner-spin-button]:hidden"
+          style={{
+            WebkitAppearance: "textfield",
+          }}
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="endTime">End Time <span className="text-red-500">*</span></Label>
+        <Label htmlFor="endTime">End Time (24-hour) <span className="text-red-500">*</span></Label>
         <Input
           id="endTime"
           type="time"
           value={endTime}
           onChange={(e) => onEndTimeChange(e.target.value)}
           required
-          className="w-full"
+          className="w-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-datetime-edit-ampm-field]:hidden [&::-webkit-inner-spin-button]:hidden"
+          style={{
+            WebkitAppearance: "textfield",
+          }}
         />
       </div>
     </div>
