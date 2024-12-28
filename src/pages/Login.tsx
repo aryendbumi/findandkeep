@@ -18,6 +18,11 @@ const Login = () => {
         }
       } catch (error) {
         console.error("Error checking auth status:", error);
+        toast({
+          title: "Error",
+          description: "Failed to check authentication status",
+          variant: "destructive",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -25,9 +30,11 @@ const Login = () => {
 
     checkUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
         navigate("/");
+      } else if (event === 'SIGNED_OUT') {
+        navigate("/login");
       }
     });
 
@@ -41,29 +48,6 @@ const Login = () => {
       </div>
     );
   }
-
-  const handleAuthError = (error: Error) => {
-    console.error("Auth error:", error);
-    if (error.message.includes("User already registered")) {
-      toast({
-        title: "Account exists",
-        description: "This email is already registered. Please sign in instead.",
-        variant: "destructive",
-      });
-    } else if (error.message.includes("Database error")) {
-      toast({
-        title: "System error",
-        description: "There was an issue with the authentication system. Please try again later.",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -120,7 +104,7 @@ const Login = () => {
                   fontSize: '0.875rem',
                   fontWeight: '500',
                   marginBottom: '0.25rem',
-                },
+                }
               }
             }}
             localization={{
@@ -132,8 +116,8 @@ const Login = () => {
                 sign_up: {
                   email_label: 'Email address',
                   password_label: 'Create a password',
-                },
-              },
+                }
+              }
             }}
             theme="default"
             providers={[]}
