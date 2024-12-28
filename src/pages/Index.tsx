@@ -38,7 +38,7 @@ const Index = () => {
 
   const handleGetStarted = () => {
     if (isAuthenticated) {
-      navigate("/available-rooms");
+      navigate("/");
     } else {
       navigate("/login");
     }
