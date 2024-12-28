@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import MyBookings from "./pages/MyBookings";
 import BookedRooms from "./pages/BookedRooms";
 import MyAccount from "./pages/MyAccount";
+import RoomManagement from "./pages/RoomManagement";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,11 @@ const App = () => (
                   <Link to="/my-bookings" className="text-sm font-medium hover:text-primary">
                     My Bookings
                   </Link>
+                  {user.role === "Super Admin" && (
+                    <Link to="/room-management" className="text-sm font-medium hover:text-primary">
+                      Room Management
+                    </Link>
+                  )}
                 </div>
                 
                 {/* User Info - Desktop */}
@@ -73,6 +79,11 @@ const App = () => (
                           <Link to="/my-account" className="text-sm font-medium hover:text-primary block py-2">
                             My Account
                           </Link>
+                          {user.role === "Super Admin" && (
+                            <Link to="/room-management" className="text-sm font-medium hover:text-primary block py-2">
+                              Room Management
+                            </Link>
+                          )}
                         </div>
                       </div>
                     </SheetContent>
@@ -88,6 +99,7 @@ const App = () => (
               <Route path="/my-bookings" element={<MyBookings />} />
               <Route path="/booked-rooms" element={<BookedRooms />} />
               <Route path="/my-account" element={<MyAccount />} />
+              <Route path="/room-management" element={<RoomManagement />} />
             </Routes>
           </main>
 
