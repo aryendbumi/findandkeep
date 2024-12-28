@@ -38,7 +38,7 @@ const Index = () => {
 
   const handleGetStarted = () => {
     if (isAuthenticated) {
-      navigate("/");
+      navigate("/dashboard");
     } else {
       navigate("/login");
     }
