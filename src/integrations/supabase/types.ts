@@ -62,25 +62,58 @@ export type Database = {
           },
         ]
       }
+      login_history: {
+        Row: {
+          id: number
+          ip_address: string | null
+          login_timestamp: string
+          success: boolean
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: never
+          ip_address?: string | null
+          login_timestamp?: string
+          success?: boolean
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: never
+          ip_address?: string | null
+          login_timestamp?: string
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
           email: string
+          first_name: string | null
           id: string
+          last_name: string | null
           role: string
           updated_at: string
         }
         Insert: {
           created_at?: string
           email: string
+          first_name?: string | null
           id: string
+          last_name?: string | null
           role: string
           updated_at?: string
         }
         Update: {
           created_at?: string
           email?: string
+          first_name?: string | null
           id?: string
+          last_name?: string | null
           role?: string
           updated_at?: string
         }
