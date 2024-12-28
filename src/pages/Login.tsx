@@ -29,7 +29,7 @@ const Login = () => {
           confettiRef.current?.fire({
             spread: 360,
             startVelocity: 30,
-            elementCount: 150,
+            particleCount: 150,
             decay: 0.95
           });
           // Give time for confetti before navigation
@@ -139,9 +139,6 @@ const Login = () => {
             theme="default"
             providers={[]}
             redirectTo={window.location.origin}
-            onViewChange={(newView) => {
-              setView(newView === 'sign_in' ? 'sign_in' : 'sign_up');
-            }}
           />
         </div>
       </div>
