@@ -9,11 +9,11 @@ interface RoomCardProps {
   name: string;
   description: string;
   capacity: number;
-  imageUrl: string;
+  image_url: string; // Changed from imageUrl to match Supabase schema
   amenities: string[];
 }
 
-export function RoomCard({ name, description, capacity, imageUrl, amenities }: RoomCardProps) {
+export function RoomCard({ name, description, capacity, image_url, amenities }: RoomCardProps) {
   console.log("RoomCard rendering for:", name);
   
   const amenityIcons = {
@@ -26,7 +26,7 @@ export function RoomCard({ name, description, capacity, imageUrl, amenities }: R
     <Card className="room-card overflow-hidden" role="article" aria-label={`Meeting room: ${name}`}>
       <div className="aspect-video relative overflow-hidden">
         <img
-          src={imageUrl}
+          src={image_url}
           alt={`Interior view of ${name}`}
           className="object-cover w-full h-full hover:scale-105 transition-transform duration-300"
           onError={(e) => {
