@@ -24,15 +24,12 @@ export function BookingTimeInputs({
           value={startTime}
           onChange={(e) => onStartTimeChange(e.target.value)}
           required
-          className="w-full"
+          className="w-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-datetime-edit-ampm-field]:hidden [&::-webkit-inner-spin-button]:hidden"
           min="00:00"
           max="23:59"
-          step="60"
+          pattern="[0-9]{2}:[0-9]{2}"
           style={{
-            // Force 24-hour display and remove browser styling
-            WebkitAppearance: "none",
-            MozAppearance: "textfield",
-            appearance: "textfield"
+            WebkitAppearance: "textfield",
           }}
         />
       </div>
@@ -44,15 +41,12 @@ export function BookingTimeInputs({
           value={endTime}
           onChange={(e) => onEndTimeChange(e.target.value)}
           required
-          className="w-full"
+          className="w-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-datetime-edit-ampm-field]:hidden [&::-webkit-inner-spin-button]:hidden"
           min="00:00"
           max="23:59"
-          step="60"
+          pattern="[0-9]{2}:[0-9]{2}"
           style={{
-            // Force 24-hour display and remove browser styling
-            WebkitAppearance: "none",
-            MozAppearance: "textfield",
-            appearance: "textfield"
+            WebkitAppearance: "textfield",
           }}
         />
       </div>
