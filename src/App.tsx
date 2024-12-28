@@ -4,11 +4,12 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
+import { Menu, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Index from "./pages/Index";
 import MyBookings from "./pages/MyBookings";
 import BookedRooms from "./pages/BookedRooms";
+import MyAccount from "./pages/MyAccount";
 
 const queryClient = new QueryClient();
 
@@ -41,10 +42,15 @@ const App = () => (
                 </div>
                 
                 {/* User Info - Desktop */}
-                <div className="hidden md:flex items-center gap-2">
+                <div className="hidden md:flex items-center gap-4">
                   <span className="text-sm">
                     Hey, {user.name}! You're a {user.role}.
                   </span>
+                  <Link to="/my-account">
+                    <Button variant="ghost" size="icon">
+                      <UserCircle className="h-5 w-5" />
+                    </Button>
+                  </Link>
                 </div>
 
                 {/* User Info - Mobile */}
@@ -63,6 +69,11 @@ const App = () => (
                         <p className="text-sm text-muted-foreground">
                           You're a {user.role}
                         </p>
+                        <div className="mt-4">
+                          <Link to="/my-account" className="text-sm font-medium hover:text-primary block py-2">
+                            My Account
+                          </Link>
+                        </div>
                       </div>
                     </SheetContent>
                   </Sheet>
@@ -76,6 +87,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/my-bookings" element={<MyBookings />} />
               <Route path="/booked-rooms" element={<BookedRooms />} />
+              <Route path="/my-account" element={<MyAccount />} />
             </Routes>
           </main>
 
