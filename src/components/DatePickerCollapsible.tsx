@@ -10,7 +10,7 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface DatePickerCollapsibleProps {
-  date: Date;
+  date: Date | undefined;
   onDateChange: (date: Date) => void;
 }
 
@@ -21,7 +21,7 @@ const DatePickerCollapsible = ({ date, onDateChange }: DatePickerCollapsibleProp
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger asChild>
         <Button variant="outline" className="w-[240px] justify-between">
-          <span>Selected: {format(date, "PPP")}</span>
+          <span>{date ? format(date, "PPP") : "Pick a date"}</span>
           {isOpen ? (
             <ChevronUp className="h-4 w-4" />
           ) : (
