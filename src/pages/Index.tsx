@@ -1,9 +1,48 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Calendar, Clock, Users } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { toast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setIsAuthenticated(!!session);
+      } catch (error) {
+        console.error("Error checking auth status:", error);
+        toast({
+          title: "Error",
+          description: "Failed to check authentication status",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleGetStarted = () => {
+    if (isAuthenticated) {
+      navigate("/available-rooms");
+    } else {
+      navigate("/login");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
@@ -17,10 +56,11 @@ const Index = () => {
         </p>
         <Button
           size="lg"
-          onClick={() => navigate("/login")}
+          onClick={handleGetStarted}
           className="text-lg px-8 py-6 h-auto gap-3"
+          disabled={isLoading}
         >
-          Get Started Now
+          {isLoading ? "Loading..." : isAuthenticated ? "View Available Rooms" : "Get Started Now"}
           <ArrowRight className="w-5 h-5" />
         </Button>
       </div>
