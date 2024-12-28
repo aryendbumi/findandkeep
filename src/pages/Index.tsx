@@ -6,6 +6,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Link } from "react-router-dom";
+import RoomTimeline from "@/components/RoomTimeline";
 
 const rooms = [
   {
@@ -87,18 +88,19 @@ const Index = () => {
                   Booked Rooms
                 </Button>
               </CollapsibleTrigger>
-              <Link to="/my-bookings" className="text-sm text-primary hover:underline">
+              <Link to="/booked-rooms" className="text-sm text-primary hover:underline">
                 View All Bookings
               </Link>
             </div>
             <CollapsibleContent className="mt-4">
-              <div className="border rounded-lg p-4 bg-white">
+              <div className="space-y-4">
                 <Calendar
                   mode="single"
                   selected={date}
                   onSelect={setDate}
-                  className="rounded-md border mx-auto"
+                  className="rounded-md border mx-auto bg-white"
                 />
+                <RoomTimeline />
               </div>
             </CollapsibleContent>
           </Collapsible>
