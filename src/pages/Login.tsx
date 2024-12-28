@@ -26,7 +26,7 @@ const Login = () => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session) => {
       if (session) {
-        if (event === "SIGNED_UP") {
+        if (event === 'SIGNED_UP') {  // Use single quotes for the string literal
           confettiRef.current?.fire({
             spread: 360,
             startVelocity: 30,
