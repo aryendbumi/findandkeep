@@ -51,11 +51,13 @@ const rooms = [
 ];
 
 const Index = () => {
+  console.log("Index component rendering");
   const [searchQuery, setSearchQuery] = useState("");
   const [capacityFilter, setCapacityFilter] = useState("any");
   const [isTimelineOpen, setIsTimelineOpen] = useState(false);
 
   const filteredRooms = rooms.filter(room => {
+    console.log("Filtering rooms with query:", searchQuery, "and capacity:", capacityFilter);
     const matchesSearch = room.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          room.description.toLowerCase().includes(searchQuery.toLowerCase());
     
@@ -122,9 +124,10 @@ const Index = () => {
         />
         
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredRooms.map((room) => (
-            <RoomCard key={room.id} {...room} />
-          ))}
+          {filteredRooms.map((room) => {
+            console.log("Rendering room:", room.name);
+            return <RoomCard key={room.id} {...room} />;
+          })}
         </div>
       </main>
     </div>

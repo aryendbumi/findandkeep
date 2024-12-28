@@ -15,6 +15,8 @@ interface RoomCardProps {
 }
 
 export function RoomCard({ name, description, capacity, imageUrl, amenities }: RoomCardProps) {
+  console.log("RoomCard rendering for:", name);
+  
   const amenityIcons = {
     wifi: <Wifi className="amenity-icon" />,
     coffee: <Coffee className="amenity-icon" />,
@@ -28,6 +30,10 @@ export function RoomCard({ name, description, capacity, imageUrl, amenities }: R
           src={imageUrl}
           alt={name}
           className="object-cover w-full h-full hover:scale-105 transition-transform duration-300"
+          onError={(e) => {
+            console.error("Image failed to load for room:", name);
+            e.currentTarget.src = "/placeholder.svg";
+          }}
         />
       </div>
       <CardHeader>
@@ -44,11 +50,14 @@ export function RoomCard({ name, description, capacity, imageUrl, amenities }: R
       </CardHeader>
       <CardContent>
         <div className="flex gap-2">
-          {amenities.map((amenity) => (
-            <div key={amenity} className="flex items-center gap-1">
-              {amenityIcons[amenity as keyof typeof amenityIcons]}
-            </div>
-          ))}
+          {amenities.map((amenity) => {
+            console.log("Rendering amenity:", amenity, "for room:", name);
+            return (
+              <div key={amenity} className="flex items-center gap-1">
+                {amenityIcons[amenity as keyof typeof amenityIcons]}
+              </div>
+            );
+          })}
         </div>
       </CardContent>
       <CardFooter className="flex justify-end">
