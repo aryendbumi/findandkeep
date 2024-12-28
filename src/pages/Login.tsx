@@ -53,7 +53,7 @@ const Login = () => {
     <div className="min-h-screen bg-background flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-foreground">
-          Welcome to MeetSpace
+          Welcome to Find And Keep
         </h2>
         <p className="mt-2 text-center text-sm text-muted-foreground">
           Sign in to your account or create a new one
@@ -75,17 +75,14 @@ const Login = () => {
                   height: '2.5rem',
                   fontSize: '0.875rem',
                   fontWeight: '500',
-                  '&:hover': {
-                    opacity: '0.9',
-                  },
+                  opacity: '1',
+                  transition: 'opacity 0.2s',
                 },
                 anchor: { 
                   color: 'hsl(var(--primary))',
                   fontSize: '0.875rem',
-                  '&:hover': {
-                    opacity: '0.8',
-                    textDecoration: 'underline',
-                  },
+                  textDecoration: 'none',
+                  transition: 'all 0.2s',
                 },
                 container: { 
                   width: '100%',
@@ -96,10 +93,8 @@ const Login = () => {
                   backgroundColor: 'hsl(var(--background))',
                   height: '2.5rem',
                   fontSize: '0.875rem',
-                  '&:focus': {
-                    borderColor: 'hsl(var(--ring))',
-                    boxShadow: '0 0 0 1px hsl(var(--ring))',
-                  },
+                  outline: 'none',
+                  transition: 'all 0.2s',
                 },
                 message: { 
                   color: 'hsl(var(--destructive))',
