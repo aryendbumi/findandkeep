@@ -44,7 +44,7 @@
 }
 
 .amenity-icon {
-  @apply w-4 h-4 text-muted-foreground;
+  @apply w-4 h-4 text-gray-700;
 }
 
 /* Enhanced transitions */
@@ -52,9 +52,9 @@
   @apply transition-all duration-300 ease-in-out;
 }
 
-/* Improved fonts */
+/* Improved fonts and contrast */
 h1, h2, h3, h4, h5, h6 {
-  @apply font-sans tracking-tight;
+  @apply font-sans tracking-tight text-gray-900;
 }
 
 /* Smooth scrolling for elements */
@@ -65,4 +65,22 @@ h1, h2, h3, h4, h5, h6 {
 /* Enhanced button interactions */
 .button-hover {
   @apply transition-all duration-200 hover:shadow-md active:scale-95;
+}
+
+/* Focus styles for better accessibility */
+:focus-visible {
+  @apply outline-2 outline-offset-2 outline-blue-600;
+}
+
+/* High contrast text for better readability */
+.text-high-contrast {
+  @apply text-gray-900;
+}
+
+.text-medium-contrast {
+  @apply text-gray-700;
+}
+
+.text-low-contrast {
+  @apply text-gray-600;
 }

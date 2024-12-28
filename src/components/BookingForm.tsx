@@ -7,6 +7,7 @@ import { BookingTimeInputs } from "./booking/BookingTimeInputs";
 import { BookingDetails } from "./booking/BookingDetails";
 import { BookingPriority } from "./booking/BookingPriority";
 import DatePickerCollapsible from "./DatePickerCollapsible";
+import { Loader2 } from "lucide-react";
 
 interface BookingFormProps {
   roomName: string;
@@ -14,7 +15,7 @@ interface BookingFormProps {
   onClose?: () => void;
 }
 
-// Mock data - replace with actual API call
+// Enhanced mock data with 10 more bookings
 const getMockTimeSlots = (date: Date) => [
   { start: "07:00", end: "09:00", duration: "2 hours", isBooked: false },
   { 
@@ -34,7 +35,46 @@ const getMockTimeSlots = (date: Date) => [
     bookedBy: "Sarah",
     eventName: "Client Call"
   },
-  { start: "16:00", end: "21:00", duration: "5 hours", isBooked: false },
+  { 
+    start: "16:00", 
+    end: "17:00", 
+    duration: "1 hour", 
+    isBooked: true,
+    bookedBy: "Mike",
+    eventName: "Sprint Planning"
+  },
+  { 
+    start: "17:00", 
+    end: "18:00", 
+    duration: "1 hour", 
+    isBooked: true,
+    bookedBy: "Emma",
+    eventName: "Design Review"
+  },
+  { 
+    start: "18:00", 
+    end: "19:00", 
+    duration: "1 hour", 
+    isBooked: true,
+    bookedBy: "Alex",
+    eventName: "1:1 Meeting"
+  },
+  { 
+    start: "19:00", 
+    end: "20:00", 
+    duration: "1 hour", 
+    isBooked: true,
+    bookedBy: "Lisa",
+    eventName: "Project Sync"
+  },
+  { 
+    start: "20:00", 
+    end: "21:00", 
+    duration: "1 hour", 
+    isBooked: true,
+    bookedBy: "Tom",
+    eventName: "Team Retrospective"
+  }
 ];
 
 export function BookingForm({ roomName, capacity, onClose }: BookingFormProps) {
@@ -46,11 +86,60 @@ export function BookingForm({ roomName, capacity, onClose }: BookingFormProps) {
   const [isExternal, setIsExternal] = useState(false);
   const [attendees, setAttendees] = useState("");
   const [priority, setPriority] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const timeSlots = date ? getMockTimeSlots(date) : [];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateTimeSlot = () => {
+    if (!startTime || !endTime) return false;
+    
+    const [startHour, startMinute] = startTime.split(":").map(Number);
+    const [endHour, endMinute] = endTime.split(":").map(Number);
+    
+    // Check if end time is after start time
+    if (endHour < startHour || (endHour === startHour && endMinute <= startMinute)) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Time Range",
+        description: "End time must be after start time",
+      });
+      return false;
+    }
+
+    // Check for conflicts with existing bookings
+    const newStart = startHour + startMinute / 60;
+    const newEnd = endHour + endMinute / 60;
+
+    const hasConflict = timeSlots.some(slot => {
+      if (!slot.isBooked) return false;
+      
+      const [slotStartHour, slotStartMinute] = slot.start.split(":").map(Number);
+      const [slotEndHour, slotEndMinute] = slot.end.split(":").map(Number);
+      
+      const slotStart = slotStartHour + slotStartMinute / 60;
+      const slotEnd = slotEndHour + slotEndMinute / 60;
+
+      return (
+        (newStart >= slotStart && newStart < slotEnd) ||
+        (newEnd > slotStart && newEnd <= slotEnd) ||
+        (newStart <= slotStart && newEnd >= slotEnd)
+      );
+    });
+
+    if (hasConflict) {
+      toast({
+        variant: "destructive",
+        title: "Time Slot Conflict",
+        description: "This time slot overlaps with an existing booking",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!date || !startTime || !endTime || !agenda || !attendees || !priority) {
@@ -62,13 +151,30 @@ export function BookingForm({ roomName, capacity, onClose }: BookingFormProps) {
       return;
     }
 
-    toast({
-      title: "Room Booked!",
-      description: `You have successfully booked ${roomName} for ${date?.toLocaleDateString()}`,
-    });
+    if (!validateTimeSlot()) return;
 
-    if (onClose) {
-      onClose();
+    setIsSubmitting(true);
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      toast({
+        title: "Room Booked!",
+        description: `You have successfully booked ${roomName} for ${date?.toLocaleDateString()}`,
+      });
+
+      if (onClose) {
+        onClose();
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Booking Failed",
+        description: "There was an error while booking the room. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -115,8 +221,20 @@ export function BookingForm({ roomName, capacity, onClose }: BookingFormProps) {
         onPriorityChange={setPriority}
       />
 
-      <Button type="submit" className="w-full">
-        Confirm Booking
+      <Button 
+        type="submit" 
+        className="w-full"
+        disabled={isSubmitting}
+        aria-label="Confirm room booking"
+      >
+        {isSubmitting ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Booking...
+          </>
+        ) : (
+          "Confirm Booking"
+        )}
       </Button>
     </form>
   );
