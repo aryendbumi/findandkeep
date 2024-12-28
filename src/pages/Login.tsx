@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
@@ -6,12 +6,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Confetti } from "@/components/ui/confetti";
-import { useRef } from "react";
 import type { ConfettiRef } from "@/components/ui/confetti";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [view, setView] = useState<"sign-in" | "sign-up">("sign-in");
+  const [view, setView] = useState<"sign_in" | "sign_up">("sign_in");
   const confettiRef = useRef<ConfettiRef>(null);
 
   useEffect(() => {
@@ -26,7 +25,7 @@ const Login = () => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
-        if (event === 'SIGNED_UP') {
+        if (event === "SIGNED_UP") {
           confettiRef.current?.fire({
             spread: 360,
             startVelocity: 30,
@@ -108,7 +107,7 @@ const Login = () => {
           Find And Keep Your Room, Now
         </h2>
         <p className="mt-2 text-center text-sm text-muted-foreground">
-          {view === "sign-in" ? "Sign in to your account" : "Create your account"}
+          {view === "sign_in" ? "Sign in to your account" : "Create your account"}
         </p>
       </div>
 
@@ -141,7 +140,7 @@ const Login = () => {
             providers={[]}
             redirectTo={window.location.origin}
             onViewChange={(newView) => {
-              setView(newView === 'sign_in' ? 'sign-in' : 'sign-up');
+              setView(newView === 'sign_in' ? 'sign_in' : 'sign_up');
             }}
           />
         </div>
