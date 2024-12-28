@@ -91,18 +91,12 @@ const Login = () => {
                   fontWeight: '500',
                   opacity: '1',
                   transition: 'opacity 0.2s',
-                  "&:hover": {
-                    opacity: '0.9',
-                  },
                 },
                 anchor: { 
                   color: 'hsl(var(--primary))',
                   fontSize: '0.875rem',
                   textDecoration: 'none',
                   transition: 'opacity 0.2s',
-                  "&:hover": {
-                    opacity: '0.8',
-                  },
                 },
                 container: { 
                   width: '100%',
