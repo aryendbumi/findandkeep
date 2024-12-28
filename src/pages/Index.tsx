@@ -2,7 +2,6 @@ import { RoomCard } from "@/components/RoomCard";
 import { RoomFilter } from "@/components/RoomFilter";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -54,8 +53,7 @@ const rooms = [
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [capacityFilter, setCapacityFilter] = useState("any");
-  const [date, setDate] = useState<Date>();
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isTimelineOpen, setIsTimelineOpen] = useState(false);
 
   const filteredRooms = rooms.filter(room => {
     const matchesSearch = room.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -79,12 +77,12 @@ const Index = () => {
       </header>
       
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-8 space-y-4">
-          <Collapsible open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+        <div className="mb-8">
+          <Collapsible open={isTimelineOpen} onOpenChange={setIsTimelineOpen}>
             <div className="flex items-center justify-between">
               <CollapsibleTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-2">
-                  {isCalendarOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  {isTimelineOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                   Booked Rooms
                 </Button>
               </CollapsibleTrigger>
@@ -93,15 +91,7 @@ const Index = () => {
               </Link>
             </div>
             <CollapsibleContent className="mt-4">
-              <div className="space-y-4">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  className="rounded-md border mx-auto bg-white"
-                />
-                <RoomTimeline />
-              </div>
+              <RoomTimeline />
             </CollapsibleContent>
           </Collapsible>
         </div>
