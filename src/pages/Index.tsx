@@ -1,129 +1,80 @@
-import { useEffect, useState } from "react";
-import { Routes, Route, Link, useNavigate } from "react-router-dom";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, UserCircle, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
-import { RoomCard } from "@/components/RoomCard";
-import { RoomFilter } from "@/components/RoomFilter";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import RoomTimeline from "@/components/RoomTimeline";
-import { useQuery } from "@tanstack/react-query";
-
-const fetchRooms = async () => {
-  const { data, error } = await supabase
-    .from('rooms')
-    .select('*');
-  
-  if (error) throw error;
-  return data;
-};
+import { ArrowRight, Calendar, Clock, Users } from "lucide-react";
 
 const Index = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [capacityFilter, setCapacityFilter] = useState("any");
-  const [isTimelineOpen, setIsTimelineOpen] = useState(false);
-
-  const { data: rooms = [], isLoading, error } = useQuery({
-    queryKey: ['rooms'],
-    queryFn: fetchRooms,
-  });
-
-  useEffect(() => {
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch rooms. Please try again later.",
-        variant: "destructive",
-      });
-    }
-  }, [error]);
-
-  const filteredRooms = rooms.filter(room => {
-    const matchesSearch = room.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (room.description || '').toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesCapacity = capacityFilter === "any" ||
-      (capacityFilter === "1-4" && room.capacity <= 4) ||
-      (capacityFilter === "5-8" && room.capacity > 4 && room.capacity <= 8) ||
-      (capacityFilter === "9+" && room.capacity > 8);
-
-    return matchesSearch && matchesCapacity;
-  });
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-sm text-gray-600">Loading rooms...</p>
-        </div>
-      </div>
-    );
-  }
+  const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b shadow-sm">
-        <div className="container mx-auto px-4 py-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">
-            Find 'N Keep, now!
-          </h1>
-          <p className="mt-2 text-muted-foreground">
-            Simplify your meeting room bookings.
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+      {/* Hero Section */}
+      <div className="container mx-auto px-4 pt-20 pb-16 text-center">
+        <h1 className="text-4xl md:text-6xl font-bold text-gray-900 tracking-tight mb-6">
+          Find 'N Keep
+        </h1>
+        <p className="text-xl md:text-2xl text-gray-600 max-w-2xl mx-auto mb-12">
+          Simplify your meeting room bookings. The smart way to manage your workspace.
+        </p>
+        <Button
+          size="lg"
+          onClick={() => navigate("/login")}
+          className="text-lg px-8 py-6 h-auto gap-3"
+        >
+          Get Started Now
+          <ArrowRight className="w-5 h-5" />
+        </Button>
+      </div>
+
+      {/* Features Section */}
+      <div className="container mx-auto px-4 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+            <Calendar className="w-12 h-12 text-primary mb-4" />
+            <h3 className="text-xl font-semibold mb-3">Quick Booking</h3>
+            <p className="text-gray-600">
+              Book meeting rooms in seconds with our intuitive interface.
+            </p>
+          </div>
+          <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+            <Clock className="w-12 h-12 text-primary mb-4" />
+            <h3 className="text-xl font-semibold mb-3">Real-time Availability</h3>
+            <p className="text-gray-600">
+              See room availability instantly and avoid scheduling conflicts.
+            </p>
+          </div>
+          <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+            <Users className="w-12 h-12 text-primary mb-4" />
+            <h3 className="text-xl font-semibold mb-3">Team Coordination</h3>
+            <p className="text-gray-600">
+              Coordinate with your team effortlessly for better collaboration.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Benefits Section */}
+      <div className="container mx-auto px-4 py-16 text-center">
+        <h2 className="text-3xl font-bold mb-12">Why Choose Find 'N Keep?</h2>
+        <div className="max-w-3xl mx-auto space-y-6 text-gray-600">
+          <p className="text-lg">
+            ✨ Save time with our streamlined booking process
+          </p>
+          <p className="text-lg">
+            📊 Optimize your workspace utilization
+          </p>
+          <p className="text-lg">
+            🤝 Enhance team collaboration and meeting management
           </p>
         </div>
-      </header>
-      
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <Collapsible 
-            open={isTimelineOpen} 
-            onOpenChange={setIsTimelineOpen}
-            className="transition-all duration-300"
-          >
-            <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm mb-2">
-              <CollapsibleTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  className="flex items-center gap-2 w-full justify-between hover:bg-gray-50 transition-colors duration-200 md:w-auto"
-                >
-                  <span className="font-medium text-lg">Booked Rooms</span>
-                  {isTimelineOpen ? (
-                    <ChevronUp className="h-5 w-5 text-gray-500" />
-                  ) : (
-                    <ChevronDown className="h-5 w-5 text-gray-500" />
-                  )}
-                </Button>
-              </CollapsibleTrigger>
-              <Link 
-                to="/booked-rooms" 
-                className="text-sm text-primary hover:underline transition-colors duration-200 hidden md:block"
-              >
-                View All Bookings
-              </Link>
-            </div>
-            <CollapsibleContent className="transition-all duration-300 ease-in-out">
-              <div className="bg-white rounded-lg shadow-sm p-4 relative">
-                <RoomTimeline />
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-        </div>
+      </div>
 
-        <RoomFilter 
-          onSearchChange={setSearchQuery}
-          onCapacityChange={setCapacityFilter}
-        />
-        
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredRooms.map((room) => (
-            <RoomCard key={room.id} {...room} />
-          ))}
+      {/* Footer */}
+      <footer className="border-t mt-20">
+        <div className="container mx-auto px-4 py-8 text-center text-gray-600">
+          <p>© {new Date().getFullYear()} Find 'N Keep. All rights reserved.</p>
+          <p className="mt-2 text-sm">Created by Fachry</p>
         </div>
-      </main>
+      </footer>
     </div>
   );
 };
