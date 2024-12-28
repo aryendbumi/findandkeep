@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Card } from "./ui/card";
-import { Calendar } from "./ui/calendar";
-import { Button } from "./ui/button";
-import { ChevronDown, ChevronUp, Users, Video } from "lucide-react";
+import { Users, Video } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -10,8 +8,8 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 import { cn } from "@/lib/utils";
+import TimelineHeader from "./TimelineHeader";
 
-// Extended mock data for better visualization
 const bookings = [
   {
     id: 1,
@@ -106,14 +104,14 @@ const RoomTimeline = () => {
 
   const getBookingPosition = (startTime: string) => {
     const [hours] = startTime.split(":").map(Number);
-    return ((hours - 7) / 14) * 100; // 7 is start hour, 14 is total hours (21-7)
+    return ((hours - 7) / 14) * 100;
   };
 
   const getBookingWidth = (startTime: string, endTime: string) => {
     const [startHours, startMinutes] = startTime.split(":").map(Number);
     const [endHours, endMinutes] = endTime.split(":").map(Number);
     const duration = (endHours + endMinutes / 60) - (startHours + startMinutes / 60);
-    return (duration / 14) * 100; // 14 is total hours
+    return (duration / 14) * 100;
   };
 
   const getPriorityColor = (priority: string) => {
@@ -131,33 +129,12 @@ const RoomTimeline = () => {
 
   return (
     <Card className="p-4">
-      <div className="flex justify-between items-center mb-4">
-        <div className="space-y-1">
-          <h3 className="font-semibold">Room Timeline</h3>
-          <p className="text-sm text-muted-foreground">
-            View room availability and bookings
-          </p>
-        </div>
-        <div className="flex items-center gap-4">
-          <Calendar
-            mode="single"
-            selected={date}
-            onSelect={(newDate) => newDate && setDate(newDate)}
-            className="rounded-md border"
-          />
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsExpanded(!isExpanded)}
-          >
-            {isExpanded ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
-      </div>
+      <TimelineHeader
+        date={date}
+        onDateChange={setDate}
+        isExpanded={isExpanded}
+        onExpandToggle={() => setIsExpanded(!isExpanded)}
+      />
 
       {isExpanded && (
         <div className="space-y-4 transition-all duration-300">
