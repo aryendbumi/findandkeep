@@ -1,5 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useState } from "react";
+import { toast } from "@/components/ui/use-toast";
 
 interface BookingTimeInputsProps {
   startTime: string;
@@ -14,10 +16,33 @@ export function BookingTimeInputs({
   onStartTimeChange,
   onEndTimeChange,
 }: BookingTimeInputsProps) {
-  const validateTimeInput = (value: string) => {
-    // Ensure the time is in valid 24-hour format between 00:00-23:59
-    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
-    return timeRegex.test(value) ? value : "";
+  const validateAndFormatTime = (value: string) => {
+    // Remove any AM/PM indicators and ensure HH:mm format
+    const timeOnly = value.replace(/[AaPpMm]/g, '').trim();
+    
+    // Check if the time is in valid 24-hour format
+    const timeRegex = /^([0-1]?[0-9]|2[0-3]):([0-5][0-9])$/;
+    if (!timeRegex.test(timeOnly)) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Time Format",
+        description: "Please enter time in 24-hour format (00:00-23:59)",
+      });
+      return "";
+    }
+    
+    // Format to ensure HH:mm (add leading zeros if needed)
+    const [hours, minutes] = timeOnly.split(':');
+    return `${hours.padStart(2, '0')}:${minutes}`;
+  };
+
+  const handleTimeChange = (value: string, isStart: boolean) => {
+    const formattedTime = validateAndFormatTime(value);
+    if (isStart) {
+      onStartTimeChange(formattedTime);
+    } else {
+      onEndTimeChange(formattedTime);
+    }
   };
 
   return (
@@ -28,7 +53,7 @@ export function BookingTimeInputs({
           id="startTime"
           type="time"
           value={startTime}
-          onChange={(e) => onStartTimeChange(validateTimeInput(e.target.value))}
+          onChange={(e) => handleTimeChange(e.target.value, true)}
           required
           className="w-full"
           min="00:00"
@@ -41,7 +66,7 @@ export function BookingTimeInputs({
           id="endTime"
           type="time"
           value={endTime}
-          onChange={(e) => onEndTimeChange(validateTimeInput(e.target.value))}
+          onChange={(e) => handleTimeChange(e.target.value, false)}
           required
           className="w-full"
           min="00:00"
