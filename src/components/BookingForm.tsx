@@ -7,12 +7,43 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/components/ui/use-toast";
+import { BookingTimeSlots } from "./BookingTimeSlots";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { format } from "date-fns";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface BookingFormProps {
   roomName: string;
   capacity: number;
   onClose?: () => void;
 }
+
+// Mock data - replace with actual API call
+const getMockTimeSlots = (date: Date) => [
+  { start: "07:00", end: "09:00", duration: "2 hours", isBooked: false },
+  { 
+    start: "09:00", 
+    end: "13:00", 
+    duration: "4 hours", 
+    isBooked: true,
+    bookedBy: "John",
+    eventName: "Team Meeting"
+  },
+  { start: "13:00", end: "14:30", duration: "1.5 hours", isBooked: false },
+  {
+    start: "14:30",
+    end: "16:00",
+    duration: "1.5 hours",
+    isBooked: true,
+    bookedBy: "Sarah",
+    eventName: "Client Call"
+  },
+  { start: "16:00", end: "21:00", duration: "5 hours", isBooked: false },
+];
 
 export function BookingForm({ roomName, capacity, onClose }: BookingFormProps) {
   const [date, setDate] = useState<Date>();
@@ -23,7 +54,10 @@ export function BookingForm({ roomName, capacity, onClose }: BookingFormProps) {
   const [isExternal, setIsExternal] = useState(false);
   const [attendees, setAttendees] = useState("");
   const [priority, setPriority] = useState("");
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const { toast } = useToast();
+
+  const timeSlots = date ? getMockTimeSlots(date) : [];
 
   const getPriorityWarning = (priority: string) => {
     switch (priority) {
@@ -39,7 +73,6 @@ export function BookingForm({ roomName, capacity, onClose }: BookingFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate required fields
     if (!date || !startTime || !endTime || !agenda || !attendees || !priority) {
       toast({
         variant: "destructive",
@@ -54,7 +87,6 @@ export function BookingForm({ roomName, capacity, onClose }: BookingFormProps) {
       description: `You have successfully booked ${roomName} for ${date?.toLocaleDateString()}`,
     });
 
-    // Close the form after successful booking
     if (onClose) {
       onClose();
     }
@@ -69,16 +101,38 @@ export function BookingForm({ roomName, capacity, onClose }: BookingFormProps) {
 
       <div className="space-y-2">
         <Label>Select Date <span className="text-red-500">*</span></Label>
-        <Calendar
-          mode="single"
-          selected={date}
-          onSelect={setDate}
-          className="rounded-md border"
-          required
-        />
+        <Collapsible open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+          <CollapsibleTrigger asChild>
+            <Button variant="outline" className="w-full justify-between">
+              <span>{date ? format(date, "PPP") : "Pick a date"}</span>
+              {isCalendarOpen ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-2">
+            <Calendar
+              mode="single"
+              selected={date}
+              onSelect={(newDate) => {
+                setDate(newDate);
+                setIsCalendarOpen(false);
+              }}
+              className="rounded-md border mx-auto"
+            />
+          </CollapsibleContent>
+        </Collapsible>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      {date && <BookingTimeSlots 
+        roomName={roomName}
+        date={date}
+        timeSlots={timeSlots}
+      />}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="startTime">Start Time <span className="text-red-500">*</span></Label>
           <Input
@@ -87,6 +141,7 @@ export function BookingForm({ roomName, capacity, onClose }: BookingFormProps) {
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
             required
+            className="w-full"
           />
         </div>
         <div className="space-y-2">
@@ -97,6 +152,7 @@ export function BookingForm({ roomName, capacity, onClose }: BookingFormProps) {
             value={endTime}
             onChange={(e) => setEndTime(e.target.value)}
             required
+            className="w-full"
           />
         </div>
       </div>
