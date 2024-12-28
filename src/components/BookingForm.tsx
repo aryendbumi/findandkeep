@@ -9,74 +9,13 @@ import { BookingPriority } from "./booking/BookingPriority";
 import DatePickerCollapsible from "./DatePickerCollapsible";
 import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BookingFormProps {
   roomName: string;
   capacity: number;
   onClose?: () => void;
 }
-
-// Enhanced mock data with 10 more bookings
-const getMockTimeSlots = (date: Date) => [
-  { start: "07:00", end: "09:00", duration: "2 hours", isBooked: false },
-  { 
-    start: "09:00", 
-    end: "13:00", 
-    duration: "4 hours", 
-    isBooked: true,
-    bookedBy: "John",
-    eventName: "Team Meeting"
-  },
-  { start: "13:00", end: "14:30", duration: "1.5 hours", isBooked: false },
-  {
-    start: "14:30",
-    end: "16:00",
-    duration: "1.5 hours",
-    isBooked: true,
-    bookedBy: "Sarah",
-    eventName: "Client Call"
-  },
-  { 
-    start: "16:00", 
-    end: "17:00", 
-    duration: "1 hour", 
-    isBooked: true,
-    bookedBy: "Mike",
-    eventName: "Sprint Planning"
-  },
-  { 
-    start: "17:00", 
-    end: "18:00", 
-    duration: "1 hour", 
-    isBooked: true,
-    bookedBy: "Emma",
-    eventName: "Design Review"
-  },
-  { 
-    start: "18:00", 
-    end: "19:00", 
-    duration: "1 hour", 
-    isBooked: true,
-    bookedBy: "Alex",
-    eventName: "1:1 Meeting"
-  },
-  { 
-    start: "19:00", 
-    end: "20:00", 
-    duration: "1 hour", 
-    isBooked: true,
-    bookedBy: "Lisa",
-    eventName: "Project Sync"
-  },
-  { 
-    start: "20:00", 
-    end: "21:00", 
-    duration: "1 hour", 
-    isBooked: true,
-    bookedBy: "Tom",
-    eventName: "Team Retrospective"
-  }
-];
 
 export function BookingForm({ roomName, capacity, onClose }: BookingFormProps) {
   const [date, setDate] = useState<Date>();
@@ -91,56 +30,6 @@ export function BookingForm({ roomName, capacity, onClose }: BookingFormProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const timeSlots = date ? getMockTimeSlots(date) : [];
-
-  const validateTimeSlot = () => {
-    if (!startTime || !endTime) return false;
-    
-    const [startHour, startMinute] = startTime.split(":").map(Number);
-    const [endHour, endMinute] = endTime.split(":").map(Number);
-    
-    // Check if end time is after start time
-    if (endHour < startHour || (endHour === startHour && endMinute <= startMinute)) {
-      toast({
-        variant: "destructive",
-        title: "Invalid Time Range",
-        description: "End time must be after start time",
-      });
-      return false;
-    }
-
-    // Check for conflicts with existing bookings
-    const newStart = startHour + startMinute / 60;
-    const newEnd = endHour + endMinute / 60;
-
-    const hasConflict = timeSlots.some(slot => {
-      if (!slot.isBooked) return false;
-      
-      const [slotStartHour, slotStartMinute] = slot.start.split(":").map(Number);
-      const [slotEndHour, slotEndMinute] = slot.end.split(":").map(Number);
-      
-      const slotStart = slotStartHour + slotStartMinute / 60;
-      const slotEnd = slotEndHour + slotEndMinute / 60;
-
-      return (
-        (newStart >= slotStart && newStart < slotEnd) ||
-        (newEnd > slotStart && newEnd <= slotEnd) ||
-        (newStart <= slotStart && newEnd >= slotEnd)
-      );
-    });
-
-    if (hasConflict) {
-      toast({
-        variant: "destructive",
-        title: "Time Slot Conflict",
-        description: "This time slot overlaps with an existing booking",
-      });
-      return false;
-    }
-
-    return true;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -153,31 +42,125 @@ export function BookingForm({ roomName, capacity, onClose }: BookingFormProps) {
       return;
     }
 
-    if (!validateTimeSlot()) return;
-
     setIsSubmitting(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
+      const { data: rooms } = await supabase
+        .from('rooms')
+        .select('id')
+        .eq('name', roomName)
+        .single();
+
+      if (!rooms) throw new Error("Room not found");
+
+      const startDateTime = new Date(date);
+      const [startHours, startMinutes] = startTime.split(':').map(Number);
+      startDateTime.setHours(startHours, startMinutes);
+
+      const endDateTime = new Date(date);
+      const [endHours, endMinutes] = endTime.split(':').map(Number);
+      endDateTime.setHours(endHours, endMinutes);
+
+      const { error: bookingError } = await supabase
+        .from('bookings')
+        .insert([{
+          room_id: rooms.id,
+          user_id: user.id,
+          title: agenda,
+          start_time: startDateTime.toISOString(),
+          end_time: endDateTime.toISOString(),
+          attendees: parseInt(attendees),
+          type: isExternal ? 'External' : 'Internal',
+          zoom_required: needsZoom,
+          priority: priority.toLowerCase()
+        }]);
+
+      if (bookingError) throw bookingError;
+
       toast({
         title: "Room Booked!",
-        description: `You have successfully booked ${roomName} for ${date?.toLocaleDateString()}`,
+        description: `You have successfully booked ${roomName} for ${date.toLocaleDateString()}`,
       });
 
       // Navigate to home page after successful booking
       navigate("/");
-    } catch (error) {
+      if (onClose) onClose();
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Booking Failed",
-        description: "There was an error while booking the room. Please try again.",
+        description: error.message || "There was an error while booking the room. Please try again.",
       });
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const getMockTimeSlots = (date: Date) => [
+    { start: "07:00", end: "09:00", duration: "2 hours", isBooked: false },
+    { 
+      start: "09:00", 
+      end: "13:00", 
+      duration: "4 hours", 
+      isBooked: true,
+      bookedBy: "John",
+      eventName: "Team Meeting"
+    },
+    { start: "13:00", end: "14:30", duration: "1.5 hours", isBooked: false },
+    {
+      start: "14:30",
+      end: "16:00",
+      duration: "1.5 hours",
+      isBooked: true,
+      bookedBy: "Sarah",
+      eventName: "Client Call"
+    },
+    { 
+      start: "16:00", 
+      end: "17:00", 
+      duration: "1 hour", 
+      isBooked: true,
+      bookedBy: "Mike",
+      eventName: "Sprint Planning"
+    },
+    { 
+      start: "17:00", 
+      end: "18:00", 
+      duration: "1 hour", 
+      isBooked: true,
+      bookedBy: "Emma",
+      eventName: "Design Review"
+    },
+    { 
+      start: "18:00", 
+      end: "19:00", 
+      duration: "1 hour", 
+      isBooked: true,
+      bookedBy: "Alex",
+      eventName: "1:1 Meeting"
+    },
+    { 
+      start: "19:00", 
+      end: "20:00", 
+      duration: "1 hour", 
+      isBooked: true,
+      bookedBy: "Lisa",
+      eventName: "Project Sync"
+    },
+    { 
+      start: "20:00", 
+      end: "21:00", 
+      duration: "1 hour", 
+      isBooked: true,
+      bookedBy: "Tom",
+      eventName: "Team Retrospective"
+    }
+  ];
+
+  const timeSlots = date ? getMockTimeSlots(date) : [];
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

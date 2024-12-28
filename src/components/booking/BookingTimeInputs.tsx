@@ -2,7 +2,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
-import { toast } from "@/components/ui/use-toast";
 
 interface BookingTimeInputsProps {
   startTime: string;
@@ -49,31 +48,6 @@ export function BookingTimeInputs({
     };
   };
 
-  const handleTimeChange = (value: string, isStart: boolean) => {
-    const period = isStart ? startPeriod : endPeriod;
-    const time24 = convertTo24Hour(value, period);
-    
-    if (isStart) {
-      onStartTimeChange(time24);
-    } else {
-      onEndTimeChange(time24);
-    }
-  };
-
-  const handlePeriodChange = (newPeriod: "AM" | "PM", isStart: boolean) => {
-    const currentTime = isStart ? startTime : endTime;
-    const { time } = convertTo12Hour(currentTime);
-    const time24 = convertTo24Hour(time, newPeriod);
-    
-    if (isStart) {
-      setStartPeriod(newPeriod);
-      onStartTimeChange(time24);
-    } else {
-      setEndPeriod(newPeriod);
-      onEndTimeChange(time24);
-    }
-  };
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
@@ -83,11 +57,14 @@ export function BookingTimeInputs({
             id="startTime"
             type="time"
             value={convertTo12Hour(startTime).time}
-            onChange={(e) => handleTimeChange(e.target.value, true)}
+            onChange={(e) => onStartTimeChange(convertTo24Hour(e.target.value, startPeriod))}
             required
             className="w-full"
           />
-          <Select value={startPeriod} onValueChange={(value: "AM" | "PM") => handlePeriodChange(value, true)}>
+          <Select value={startPeriod} onValueChange={(value: "AM" | "PM") => {
+            setStartPeriod(value);
+            onStartTimeChange(convertTo24Hour(convertTo12Hour(startTime).time, value));
+          }}>
             <SelectTrigger className="w-24">
               <SelectValue placeholder="AM/PM" />
             </SelectTrigger>
@@ -105,11 +82,14 @@ export function BookingTimeInputs({
             id="endTime"
             type="time"
             value={convertTo12Hour(endTime).time}
-            onChange={(e) => handleTimeChange(e.target.value, false)}
+            onChange={(e) => onEndTimeChange(convertTo24Hour(e.target.value, endPeriod))}
             required
             className="w-full"
           />
-          <Select value={endPeriod} onValueChange={(value: "AM" | "PM") => handlePeriodChange(value, false)}>
+          <Select value={endPeriod} onValueChange={(value: "AM" | "PM") => {
+            setEndPeriod(value);
+            onEndTimeChange(convertTo24Hour(convertTo12Hour(endTime).time, value));
+          }}>
             <SelectTrigger className="w-24">
               <SelectValue placeholder="AM/PM" />
             </SelectTrigger>
