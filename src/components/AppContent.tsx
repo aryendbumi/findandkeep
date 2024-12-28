@@ -9,6 +9,7 @@ import MyBookings from "@/pages/MyBookings";
 import BookedRooms from "@/pages/BookedRooms";
 import MyAccount from "@/pages/MyAccount";
 import RoomManagement from "@/pages/RoomManagement";
+import AvailableRooms from "@/pages/AvailableRooms";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
@@ -156,7 +157,7 @@ export const AppContent = () => {
 
       <main className="flex-1">
         <Routes>
-          <Route path="/" element={<BookedRooms />} />
+          <Route path="/" element={<AvailableRooms />} />
           <Route path="/my-bookings" element={<MyBookings />} />
           <Route path="/booked-rooms" element={<BookedRooms />} />
           <Route path="/my-account" element={<MyAccount />} />
