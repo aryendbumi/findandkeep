@@ -69,29 +69,49 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
+      <header className="bg-white border-b shadow-sm">
         <div className="container mx-auto px-4 py-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Find 'N Keep, now!</h1>
-          <p className="mt-2 text-muted-foreground">Simplify your meeting room bookings.</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">
+            Find 'N Keep, now!
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            Simplify your meeting room bookings.
+          </p>
         </div>
       </header>
       
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <Collapsible open={isTimelineOpen} onOpenChange={setIsTimelineOpen}>
-            <div className="flex items-center justify-between">
+          <Collapsible 
+            open={isTimelineOpen} 
+            onOpenChange={setIsTimelineOpen}
+            className="transition-all duration-300"
+          >
+            <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm mb-2">
               <CollapsibleTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2">
-                  {isTimelineOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                  Booked Rooms
+                <Button 
+                  variant="ghost" 
+                  className="flex items-center gap-2 w-full justify-between hover:bg-gray-50 transition-colors duration-200"
+                >
+                  <span className="font-medium text-lg">Booked Rooms</span>
+                  {isTimelineOpen ? (
+                    <ChevronUp className="h-5 w-5 text-gray-500" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5 text-gray-500" />
+                  )}
                 </Button>
               </CollapsibleTrigger>
-              <Link to="/booked-rooms" className="text-sm text-primary hover:underline">
+              <Link 
+                to="/booked-rooms" 
+                className="text-sm text-primary hover:underline transition-colors duration-200"
+              >
                 View All Bookings
               </Link>
             </div>
-            <CollapsibleContent className="mt-4">
-              <RoomTimeline />
+            <CollapsibleContent className="transition-all duration-300 ease-in-out">
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <RoomTimeline />
+              </div>
             </CollapsibleContent>
           </Collapsible>
         </div>
