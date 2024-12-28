@@ -53,33 +53,19 @@ const Login = () => {
     <div className="min-h-screen bg-background flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-foreground">
-          Find And Keep Your Room, Now
+          Welcome Back
         </h2>
         <p className="mt-2 text-center text-sm text-muted-foreground">
-          Sign in to your account to continue
+          Sign in to your account or create a new one
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-card py-8 px-4 shadow-lg sm:rounded-lg sm:px-10 border">
+        <div className="bg-card py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <Auth
             supabaseClient={supabase}
             appearance={{ 
               theme: ThemeSupa,
-              variables: {
-                default: {
-                  colors: {
-                    brand: 'hsl(var(--primary))',
-                    brandAccent: 'hsl(var(--primary))',
-                    brandButtonText: 'hsl(var(--primary-foreground))',
-                  },
-                  radii: {
-                    borderRadiusButton: 'var(--radius)',
-                    buttonBorderRadius: 'var(--radius)',
-                    inputBorderRadius: 'var(--radius)',
-                  },
-                },
-              },
               style: {
                 button: { 
                   background: 'hsl(var(--primary))',
@@ -89,14 +75,10 @@ const Login = () => {
                   height: '2.5rem',
                   fontSize: '0.875rem',
                   fontWeight: '500',
-                  opacity: '1',
-                  transition: 'all 0.2s',
                 },
                 anchor: { 
                   color: 'hsl(var(--primary))',
                   fontSize: '0.875rem',
-                  textDecoration: 'none',
-                  transition: 'all 0.2s',
                 },
                 container: { 
                   width: '100%',
@@ -107,8 +89,6 @@ const Login = () => {
                   backgroundColor: 'hsl(var(--background))',
                   height: '2.5rem',
                   fontSize: '0.875rem',
-                  outline: 'none',
-                  transition: 'all 0.2s',
                 },
                 message: { 
                   color: 'hsl(var(--destructive))',
