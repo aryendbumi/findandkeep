@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Confetti } from "@/components/ui/confetti";
 import type { ConfettiRef } from "@/components/ui/confetti";
+import { toast } from "sonner";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -127,6 +128,14 @@ const Login = () => {
             theme="default"
             providers={[]}
             redirectTo={window.location.origin}
+            onError={(error) => {
+              if (error.message.includes("User already registered")) {
+                toast.error("This email is already registered. Please sign in instead.");
+                setView("sign_in");
+              } else {
+                toast.error(error.message);
+              }
+            }}
           />
         </div>
       </div>
