@@ -53,10 +53,10 @@ const Login = () => {
     <div className="min-h-screen bg-background flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-foreground">
-          Welcome to Find And Keep
+          Find And Keep Your Room, Now
         </h2>
         <p className="mt-2 text-center text-sm text-muted-foreground">
-          Sign in to your account or create a new one
+          Sign in to your account to continue
         </p>
       </div>
 
@@ -66,6 +66,20 @@ const Login = () => {
             supabaseClient={supabase}
             appearance={{ 
               theme: ThemeSupa,
+              variables: {
+                default: {
+                  colors: {
+                    brand: 'hsl(var(--primary))',
+                    brandAccent: 'hsl(var(--primary))',
+                    brandButtonText: 'hsl(var(--primary-foreground))',
+                  },
+                  radii: {
+                    borderRadiusButton: 'var(--radius)',
+                    buttonBorderRadius: 'var(--radius)',
+                    inputBorderRadius: 'var(--radius)',
+                  },
+                },
+              },
               style: {
                 button: { 
                   background: 'hsl(var(--primary))',
@@ -77,12 +91,18 @@ const Login = () => {
                   fontWeight: '500',
                   opacity: '1',
                   transition: 'opacity 0.2s',
+                  '&:hover': {
+                    opacity: '0.9',
+                  },
                 },
                 anchor: { 
                   color: 'hsl(var(--primary))',
                   fontSize: '0.875rem',
                   textDecoration: 'none',
-                  transition: 'all 0.2s',
+                  transition: 'opacity 0.2s',
+                  '&:hover': {
+                    opacity: '0.8',
+                  },
                 },
                 container: { 
                   width: '100%',
