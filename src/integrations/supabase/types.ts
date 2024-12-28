@@ -105,7 +105,7 @@ export type Database = {
           first_name?: string | null
           id: string
           last_name?: string | null
-          role: string
+          role?: string
           updated_at?: string
         }
         Update: {
