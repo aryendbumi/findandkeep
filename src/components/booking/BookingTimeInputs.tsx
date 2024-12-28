@@ -14,6 +14,12 @@ export function BookingTimeInputs({
   onStartTimeChange,
   onEndTimeChange,
 }: BookingTimeInputsProps) {
+  const validateTimeInput = (value: string) => {
+    // Ensure the time is in valid 24-hour format between 00:00-23:59
+    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    return timeRegex.test(value) ? value : "";
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
@@ -22,10 +28,11 @@ export function BookingTimeInputs({
           id="startTime"
           type="time"
           value={startTime}
-          onChange={(e) => onStartTimeChange(e.target.value)}
+          onChange={(e) => onStartTimeChange(validateTimeInput(e.target.value))}
           required
           className="w-full"
-          step="60"
+          min="00:00"
+          max="23:59"
         />
       </div>
       <div className="space-y-2">
@@ -34,10 +41,11 @@ export function BookingTimeInputs({
           id="endTime"
           type="time"
           value={endTime}
-          onChange={(e) => onEndTimeChange(e.target.value)}
+          onChange={(e) => onEndTimeChange(validateTimeInput(e.target.value))}
           required
           className="w-full"
-          step="60"
+          min="00:00"
+          max="23:59"
         />
       </div>
     </div>
