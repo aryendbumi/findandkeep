@@ -111,7 +111,7 @@ const Index = () => {
               </Link>
             </div>
             <CollapsibleContent className="transition-all duration-300 ease-in-out">
-              <div className="bg-white rounded-lg shadow-sm p-4">
+              <div className="bg-white rounded-lg shadow-sm p-4 relative">
                 <RoomTimeline />
               </div>
             </CollapsibleContent>

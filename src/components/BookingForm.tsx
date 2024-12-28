@@ -8,6 +8,7 @@ import { BookingDetails } from "./booking/BookingDetails";
 import { BookingPriority } from "./booking/BookingPriority";
 import DatePickerCollapsible from "./DatePickerCollapsible";
 import { Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface BookingFormProps {
   roomName: string;
@@ -88,6 +89,7 @@ export function BookingForm({ roomName, capacity, onClose }: BookingFormProps) {
   const [priority, setPriority] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const timeSlots = date ? getMockTimeSlots(date) : [];
 
@@ -164,9 +166,8 @@ export function BookingForm({ roomName, capacity, onClose }: BookingFormProps) {
         description: `You have successfully booked ${roomName} for ${date?.toLocaleDateString()}`,
       });
 
-      if (onClose) {
-        onClose();
-      }
+      // Navigate to home page after successful booking
+      navigate("/");
     } catch (error) {
       toast({
         variant: "destructive",

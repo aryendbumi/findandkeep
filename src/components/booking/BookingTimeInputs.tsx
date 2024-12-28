@@ -1,5 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import { toast } from "@/components/ui/use-toast";
 
@@ -16,32 +17,60 @@ export function BookingTimeInputs({
   onStartTimeChange,
   onEndTimeChange,
 }: BookingTimeInputsProps) {
-  const validateAndFormatTime = (value: string) => {
-    // Remove any AM/PM indicators and ensure HH:mm format
-    const timeOnly = value.replace(/[AaPpMm]/g, '').trim();
+  const [startPeriod, setStartPeriod] = useState<"AM" | "PM">("AM");
+  const [endPeriod, setEndPeriod] = useState<"AM" | "PM">("AM");
+
+  const convertTo24Hour = (time: string, period: "AM" | "PM"): string => {
+    if (!time) return "";
     
-    // Check if the time is in valid 24-hour format
-    const timeRegex = /^([0-1]?[0-9]|2[0-3]):([0-5][0-9])$/;
-    if (!timeRegex.test(timeOnly)) {
-      toast({
-        variant: "destructive",
-        title: "Invalid Time Format",
-        description: "Please enter time in 24-hour format (00:00-23:59)",
-      });
-      return "";
+    const [hours, minutes] = time.split(":").map(Number);
+    let hour24 = hours;
+    
+    if (period === "PM" && hours !== 12) {
+      hour24 = hours + 12;
+    } else if (period === "AM" && hours === 12) {
+      hour24 = 0;
     }
     
-    // Format to ensure HH:mm (add leading zeros if needed)
-    const [hours, minutes] = timeOnly.split(':');
-    return `${hours.padStart(2, '0')}:${minutes}`;
+    return `${hour24.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+  };
+
+  const convertTo12Hour = (time: string): { time: string; period: "AM" | "PM" } => {
+    if (!time) return { time: "", period: "AM" };
+    
+    const [hours, minutes] = time.split(":").map(Number);
+    let hour12 = hours % 12;
+    hour12 = hour12 || 12; // Convert 0 to 12
+    const period = hours >= 12 ? "PM" : "AM";
+    
+    return {
+      time: `${hour12.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`,
+      period
+    };
   };
 
   const handleTimeChange = (value: string, isStart: boolean) => {
-    const formattedTime = validateAndFormatTime(value);
+    const period = isStart ? startPeriod : endPeriod;
+    const time24 = convertTo24Hour(value, period);
+    
     if (isStart) {
-      onStartTimeChange(formattedTime);
+      onStartTimeChange(time24);
     } else {
-      onEndTimeChange(formattedTime);
+      onEndTimeChange(time24);
+    }
+  };
+
+  const handlePeriodChange = (newPeriod: "AM" | "PM", isStart: boolean) => {
+    const currentTime = isStart ? startTime : endTime;
+    const { time } = convertTo12Hour(currentTime);
+    const time24 = convertTo24Hour(time, newPeriod);
+    
+    if (isStart) {
+      setStartPeriod(newPeriod);
+      onStartTimeChange(time24);
+    } else {
+      setEndPeriod(newPeriod);
+      onEndTimeChange(time24);
     }
   };
 
@@ -49,29 +78,47 @@ export function BookingTimeInputs({
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
         <Label htmlFor="startTime">Start Time <span className="text-red-500">*</span></Label>
-        <Input
-          id="startTime"
-          type="time"
-          value={startTime}
-          onChange={(e) => handleTimeChange(e.target.value, true)}
-          required
-          className="w-full"
-          min="00:00"
-          max="23:59"
-        />
+        <div className="flex gap-2">
+          <Input
+            id="startTime"
+            type="time"
+            value={convertTo12Hour(startTime).time}
+            onChange={(e) => handleTimeChange(e.target.value, true)}
+            required
+            className="w-full"
+          />
+          <Select value={startPeriod} onValueChange={(value: "AM" | "PM") => handlePeriodChange(value, true)}>
+            <SelectTrigger className="w-24">
+              <SelectValue placeholder="AM/PM" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="AM">AM</SelectItem>
+              <SelectItem value="PM">PM</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       <div className="space-y-2">
         <Label htmlFor="endTime">End Time <span className="text-red-500">*</span></Label>
-        <Input
-          id="endTime"
-          type="time"
-          value={endTime}
-          onChange={(e) => handleTimeChange(e.target.value, false)}
-          required
-          className="w-full"
-          min="00:00"
-          max="23:59"
-        />
+        <div className="flex gap-2">
+          <Input
+            id="endTime"
+            type="time"
+            value={convertTo12Hour(endTime).time}
+            onChange={(e) => handleTimeChange(e.target.value, false)}
+            required
+            className="w-full"
+          />
+          <Select value={endPeriod} onValueChange={(value: "AM" | "PM") => handlePeriodChange(value, false)}>
+            <SelectTrigger className="w-24">
+              <SelectValue placeholder="AM/PM" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="AM">AM</SelectItem>
+              <SelectItem value="PM">PM</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     </div>
   );
