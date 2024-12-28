@@ -5,7 +5,6 @@ import { Menu, UserCircle, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
-import Index from "@/pages/Index";
 import MyBookings from "@/pages/MyBookings";
 import BookedRooms from "@/pages/BookedRooms";
 import MyAccount from "@/pages/MyAccount";
@@ -72,7 +71,7 @@ export const AppContent = () => {
         variant: "destructive",
       });
     } else {
-      navigate("/login");
+      navigate("/");
     }
   };
 
@@ -84,17 +83,17 @@ export const AppContent = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div className="flex gap-4">
-              <Link to="/" className="text-sm font-medium hover:text-primary">
+              <Link to="/dashboard" className="text-sm font-medium hover:text-primary">
                 Available Rooms
               </Link>
-              <Link to="/booked-rooms" className="text-sm font-medium hover:text-primary">
+              <Link to="/dashboard/booked-rooms" className="text-sm font-medium hover:text-primary">
                 Booked Rooms
               </Link>
-              <Link to="/my-bookings" className="text-sm font-medium hover:text-primary">
+              <Link to="/dashboard/my-bookings" className="text-sm font-medium hover:text-primary">
                 My Bookings
               </Link>
               {user.role === "Super Admin" && (
-                <Link to="/room-management" className="text-sm font-medium hover:text-primary">
+                <Link to="/dashboard/room-management" className="text-sm font-medium hover:text-primary">
                   Room Management
                 </Link>
               )}
@@ -105,7 +104,7 @@ export const AppContent = () => {
               <span className="text-sm">
                 Hey, {user.first_name || user.email}! You're a {user.role}.
               </span>
-              <Link to="/my-account">
+              <Link to="/dashboard/my-account">
                 <Button variant="ghost" size="icon">
                   <UserCircle className="h-5 w-5" />
                 </Button>
@@ -132,11 +131,11 @@ export const AppContent = () => {
                       You're a {user.role}
                     </p>
                     <div className="mt-4">
-                      <Link to="/my-account" className="text-sm font-medium hover:text-primary block py-2">
+                      <Link to="/dashboard/my-account" className="text-sm font-medium hover:text-primary block py-2">
                         My Account
                       </Link>
                       {user.role === "Super Admin" && (
-                        <Link to="/room-management" className="text-sm font-medium hover:text-primary block py-2">
+                        <Link to="/dashboard/room-management" className="text-sm font-medium hover:text-primary block py-2">
                           Room Management
                         </Link>
                       )}
@@ -157,7 +156,7 @@ export const AppContent = () => {
 
       <main className="flex-1">
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<BookedRooms />} />
           <Route path="/my-bookings" element={<MyBookings />} />
           <Route path="/booked-rooms" element={<BookedRooms />} />
           <Route path="/my-account" element={<MyAccount />} />
