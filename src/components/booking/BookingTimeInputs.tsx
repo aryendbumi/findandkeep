@@ -24,13 +24,9 @@ export function BookingTimeInputs({
           value={startTime}
           onChange={(e) => onStartTimeChange(e.target.value)}
           required
-          className="w-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-datetime-edit-ampm-field]:hidden [&::-webkit-inner-spin-button]:hidden"
           min="00:00"
           max="23:59"
-          pattern="[0-9]{2}:[0-9]{2}"
-          style={{
-            WebkitAppearance: "textfield",
-          }}
+          step="300"
         />
       </div>
       <div className="space-y-2">
@@ -41,13 +37,9 @@ export function BookingTimeInputs({
           value={endTime}
           onChange={(e) => onEndTimeChange(e.target.value)}
           required
-          className="w-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-datetime-edit-ampm-field]:hidden [&::-webkit-inner-spin-button]:hidden"
           min="00:00"
           max="23:59"
-          pattern="[0-9]{2}:[0-9]{2}"
-          style={{
-            WebkitAppearance: "textfield",
-          }}
+          step="300"
         />
       </div>
     </div>
