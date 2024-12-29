@@ -10,6 +10,7 @@ import BookedRooms from "@/pages/BookedRooms";
 import MyAccount from "@/pages/MyAccount";
 import RoomManagement from "@/pages/RoomManagement";
 import AvailableRooms from "@/pages/AvailableRooms";
+import RoomTimeline from "@/components/RoomTimeline";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
@@ -77,6 +78,15 @@ export const AppContent = () => {
   };
 
   if (!user) return null;
+
+  const DashboardHome = () => (
+    <div className="space-y-6">
+      <div className="border-b pb-4">
+        <RoomTimeline />
+      </div>
+      <AvailableRooms />
+    </div>
+  );
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -157,7 +167,7 @@ export const AppContent = () => {
 
       <main className="flex-1">
         <Routes>
-          <Route path="/" element={<AvailableRooms />} />
+          <Route path="/" element={<DashboardHome />} />
           <Route path="/my-bookings" element={<MyBookings />} />
           <Route path="/booked-rooms" element={<BookedRooms />} />
           <Route path="/my-account" element={<MyAccount />} />
