@@ -10,9 +10,9 @@ interface BookingPriorityProps {
 export function BookingPriority({ priority, onPriorityChange }: BookingPriorityProps) {
   const getPriorityWarning = (priority: string) => {
     switch (priority) {
-      case "1":
+      case "high":
         return "You decide this meeting will be attended by BU Head or above level";
-      case "2":
+      case "medium":
         return "You decide this meeting will be attended by Senior Manager";
       default:
         return null;
@@ -25,16 +25,16 @@ export function BookingPriority({ priority, onPriorityChange }: BookingPriorityP
         <Label>Priority <span className="text-red-500">*</span></Label>
         <RadioGroup onValueChange={onPriorityChange} value={priority} required>
           <div className="flex items-center space-x-2">
-            <RadioGroupItem value="1" id="p1" />
-            <Label htmlFor="p1">Priority 1</Label>
+            <RadioGroupItem value="high" id="p1" />
+            <Label htmlFor="p1">High Priority</Label>
           </div>
           <div className="flex items-center space-x-2">
-            <RadioGroupItem value="2" id="p2" />
-            <Label htmlFor="p2">Priority 2</Label>
+            <RadioGroupItem value="medium" id="p2" />
+            <Label htmlFor="p2">Medium Priority</Label>
           </div>
           <div className="flex items-center space-x-2">
-            <RadioGroupItem value="3" id="p3" />
-            <Label htmlFor="p3">Priority 3</Label>
+            <RadioGroupItem value="low" id="p3" />
+            <Label htmlFor="p3">Low Priority</Label>
           </div>
         </RadioGroup>
       </div>
