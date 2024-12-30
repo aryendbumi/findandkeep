@@ -1,31 +1,47 @@
 import { Calendar, Clock, Users } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-
-// Mock data - replace with real data from your backend
-const bookings = [
-  {
-    id: 1,
-    roomName: "Executive Suite",
-    date: "2024-03-20",
-    startTime: "10:00",
-    endTime: "11:00",
-    agenda: "Quarterly Review",
-    attendees: 6,
-    priority: 1,
-  },
-  {
-    id: 2,
-    roomName: "Creative Space",
-    date: "2024-03-21",
-    startTime: "14:00",
-    endTime: "15:00",
-    agenda: "Team Brainstorming",
-    attendees: 4,
-    priority: 3,
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function MyBookings() {
+  const { data: bookings = [] } = useQuery({
+    queryKey: ["my-bookings"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase
+        .from("bookings")
+        .select(`
+          *,
+          rooms(name)
+        `)
+        .eq("user_id", user.id)
+        .order("start_time", { ascending: false });
+
+      if (error) throw error;
+
+      return data.map(booking => ({
+        ...booking,
+        roomName: booking.rooms?.name,
+        date: new Date(booking.start_time).toLocaleDateString(),
+        startTime: new Date(booking.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+        endTime: new Date(booking.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+      }));
+    }
+  });
+
+  if (!bookings.length) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-2xl font-bold mb-6">My Bookings</h1>
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">You haven't made any bookings yet.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">My Bookings</h1>
@@ -34,13 +50,13 @@ export default function MyBookings() {
           <Card key={booking.id}>
             <CardHeader>
               <h3 className="text-lg font-semibold">{booking.roomName}</h3>
-              <p className="text-sm text-muted-foreground">{booking.agenda}</p>
+              <p className="text-sm text-muted-foreground">{booking.title}</p>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-4">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
-                  <span>{new Date(booking.date).toLocaleDateString()}</span>
+                  <span>{booking.date}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />
