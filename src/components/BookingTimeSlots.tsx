@@ -1,26 +1,19 @@
 import { Card } from "./ui/card";
 import { ScrollArea } from "./ui/scroll-area";
-
-interface TimeSlot {
-  start: string;
-  end: string;
-  duration: string;
-  isBooked: boolean;
-  bookedBy?: string;
-  eventName?: string;
-}
+import { useRoomBookings } from "@/hooks/useRoomBookings";
+import { useAvailableSlots } from "@/hooks/useAvailableSlots";
 
 interface BookingTimeSlotsProps {
+  roomId: number;
   roomName: string;
   date: Date | undefined;
-  timeSlots: TimeSlot[];
 }
 
-export function BookingTimeSlots({ roomName, date, timeSlots }: BookingTimeSlotsProps) {
-  if (!date) return null;
+export function BookingTimeSlots({ roomId, roomName, date }: BookingTimeSlotsProps) {
+  const { data: bookedSlots = [] } = useRoomBookings(roomId, date);
+  const availableSlots = useAvailableSlots(date, bookedSlots);
 
-  const availableSlots = timeSlots.filter(slot => !slot.isBooked);
-  const bookedSlots = timeSlots.filter(slot => slot.isBooked);
+  if (!date) return null;
 
   return (
     <Card className="p-4 mb-6 bg-muted/50">
