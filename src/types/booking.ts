@@ -1,3 +1,4 @@
+
 export interface Booking {
   id: number;
   title: string;
@@ -10,4 +11,5 @@ export interface Booking {
   type: string;
   zoom_required: boolean;
   priority: string;
+  user_id: string;
 }
