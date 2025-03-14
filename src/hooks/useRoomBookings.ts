@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -20,7 +21,7 @@ export function useRoomBookings(roomId: number, date?: Date) {
           title,
           start_time,
           end_time,
-          user:user_id (
+          profiles:user_id (
             first_name,
             last_name,
             email
@@ -37,9 +38,9 @@ export function useRoomBookings(roomId: number, date?: Date) {
         start: new Date(booking.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
         end: new Date(booking.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
         eventName: booking.title,
-        bookedBy: booking.user?.first_name 
-          ? `${booking.user.first_name} ${booking.user.last_name || ''}`
-          : booking.user?.email
+        bookedBy: booking.profiles?.first_name 
+          ? `${booking.profiles.first_name} ${booking.profiles.last_name || ''}`
+          : booking.profiles?.email || 'Unknown'
       }));
     },
     enabled: !!roomId && !!date

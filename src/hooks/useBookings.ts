@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Booking } from "@/types/booking";
@@ -11,7 +12,7 @@ export function useBookings() {
         .select(`
           *,
           rooms(name),
-          user:user_id (
+          profiles:user_id (
             first_name,
             last_name,
             email
@@ -35,9 +36,9 @@ export function useBookings() {
           minute: '2-digit', 
           hour12: false 
         }),
-        organizer: booking.user?.first_name 
-          ? `${booking.user.first_name} ${booking.user.last_name || ''}`
-          : booking.user?.email
+        organizer: booking.profiles?.first_name 
+          ? `${booking.profiles.first_name} ${booking.profiles.last_name || ''}`
+          : booking.profiles?.email || 'Unknown'
       })) as Booking[];
     }
   });
