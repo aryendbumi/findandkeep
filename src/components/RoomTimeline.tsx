@@ -54,7 +54,7 @@ const RoomTimeline = () => {
           type,
           zoom_required,
           priority,
-          profiles:user_id (
+          profiles(
             first_name,
             last_name,
             email
@@ -67,6 +67,7 @@ const RoomTimeline = () => {
 
       return data.map(booking => ({
         ...booking,
+        roomId: booking.room_id,
         startTime: new Date(booking.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
         endTime: new Date(booking.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
         organizer: booking.profiles?.first_name 

@@ -12,4 +12,9 @@ export interface Booking {
   zoom_required: boolean;
   priority: string;
   user_id: string;
+  profiles?: {
+    first_name: string | null;
+    last_name: string | null;
+    email: string;
+  };
 }

@@ -21,7 +21,7 @@ export function useRoomBookings(roomId: number, date?: Date) {
           title,
           start_time,
           end_time,
-          profiles:user_id (
+          profiles(
             first_name,
             last_name,
             email
