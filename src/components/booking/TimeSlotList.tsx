@@ -1,3 +1,4 @@
+
 import { TimeSlot } from "@/types/timeSlot";
 
 interface TimeSlotListProps {
@@ -21,7 +22,7 @@ export function TimeSlotList({ slots, type }: TimeSlotListProps) {
       </h5>
       <ul className="space-y-1">
         {filteredSlots.map((slot, index) => (
-          <li key={index} className="text-sm text-muted-foreground">
+          <li key={slot.id || index} className="text-sm text-muted-foreground">
             {slot.start}-{slot.end}
             {type === "booked" && ` - ${slot.eventName} (${slot.bookedBy})`}
             {type === "available" && ` (${slot.duration})`}
