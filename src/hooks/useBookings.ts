@@ -12,7 +12,7 @@ export function useBookings() {
         .select(`
           *,
           rooms(name),
-          profiles(
+          profiles:user_id(
             first_name,
             last_name,
             email
@@ -36,7 +36,7 @@ export function useBookings() {
           minute: '2-digit', 
           hour12: false 
         }),
-        organizer: booking.profiles?.first_name 
+        organizer: booking.profiles && booking.profiles.first_name 
           ? `${booking.profiles.first_name} ${booking.profiles.last_name || ''}`
           : booking.profiles?.email || 'Unknown'
       })) as Booking[];

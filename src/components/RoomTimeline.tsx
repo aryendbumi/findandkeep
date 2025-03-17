@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card } from "./ui/card";
 import { cn } from "@/lib/utils";
@@ -53,7 +54,8 @@ const RoomTimeline = () => {
           type,
           zoom_required,
           priority,
-          profiles(
+          user_id,
+          profiles:user_id(
             first_name,
             last_name,
             email
@@ -69,7 +71,7 @@ const RoomTimeline = () => {
         roomId: booking.room_id,
         startTime: new Date(booking.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
         endTime: new Date(booking.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
-        organizer: booking.profiles?.first_name 
+        organizer: booking.profiles && booking.profiles.first_name 
           ? `${booking.profiles.first_name} ${booking.profiles.last_name || ''}`
           : booking.profiles?.email || 'Unknown'
       }));

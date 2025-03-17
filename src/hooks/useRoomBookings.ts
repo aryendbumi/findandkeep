@@ -21,7 +21,8 @@ export function useRoomBookings(roomId: number, date?: Date) {
           title,
           start_time,
           end_time,
-          profiles(
+          user_id,
+          profiles:user_id(
             first_name,
             last_name,
             email
@@ -38,7 +39,7 @@ export function useRoomBookings(roomId: number, date?: Date) {
         start: new Date(booking.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
         end: new Date(booking.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
         eventName: booking.title,
-        bookedBy: booking.profiles?.first_name 
+        bookedBy: booking.profiles && booking.profiles.first_name 
           ? `${booking.profiles.first_name} ${booking.profiles.last_name || ''}`
           : booking.profiles?.email || 'Unknown'
       }));
