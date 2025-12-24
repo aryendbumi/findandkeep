@@ -1,53 +1,45 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Auth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(true);
+  const { login, isAuthenticated } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          navigate("/dashboard");
-        }
-      } catch (error) {
-        console.error("Error checking auth status:", error);
-        toast({
-          title: "Error",
-          description: "Failed to check authentication status",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkUser();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        navigate("/dashboard");
-      } else if (event === 'SIGNED_OUT') {
-        navigate("/login");
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+  if (isAuthenticated) {
+    navigate("/dashboard");
+    return null;
   }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    const { error } = await login(email, password);
+    
+    if (error) {
+      toast({
+        title: "Error",
+        description: error,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Welcome!",
+        description: "You have successfully signed in.",
+      });
+      navigate("/dashboard");
+    }
+    
+    setIsLoading(false);
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -56,73 +48,46 @@ const Login = () => {
           Welcome Back
         </h2>
         <p className="mt-2 text-center text-sm text-muted-foreground">
-          Sign in to your account or create a new one
+          Sign in to your account (any credentials work)
+        </p>
+        <p className="mt-1 text-center text-xs text-muted-foreground">
+          Tip: Use "admin@" in email for Super Admin role
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-card py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <Auth
-            supabaseClient={supabase}
-            appearance={{ 
-              theme: ThemeSupa,
-              style: {
-                button: { 
-                  background: 'hsl(var(--primary))',
-                  color: 'hsl(var(--primary-foreground))',
-                  borderRadius: 'var(--radius)',
-                  padding: '0.5rem 1rem',
-                  height: '2.5rem',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                },
-                anchor: { 
-                  color: 'hsl(var(--primary))',
-                  fontSize: '0.875rem',
-                },
-                container: { 
-                  width: '100%',
-                },
-                input: { 
-                  borderRadius: 'var(--radius)',
-                  borderColor: 'hsl(var(--border))',
-                  backgroundColor: 'hsl(var(--background))',
-                  height: '2.5rem',
-                  fontSize: '0.875rem',
-                },
-                message: { 
-                  color: 'hsl(var(--destructive))',
-                  fontSize: '0.875rem',
-                  marginTop: '0.25rem',
-                },
-                divider: { 
-                  backgroundColor: 'hsl(var(--border))',
-                  margin: '1.5rem 0',
-                },
-                label: { 
-                  color: 'hsl(var(--foreground))',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  marginBottom: '0.25rem',
-                }
-              }
-            }}
-            localization={{
-              variables: {
-                sign_in: {
-                  email_label: 'Email address',
-                  password_label: 'Password',
-                },
-                sign_up: {
-                  email_label: 'Email address',
-                  password_label: 'Create a password',
-                }
-              }
-            }}
-            theme="default"
-            providers={[]}
-            redirectTo={window.location.origin}
-          />
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <Label htmlFor="email">Email address</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="mt-1"
+                placeholder="you@example.com"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="mt-1"
+                placeholder="••••••••"
+              />
+            </div>
+
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Signing in..." : "Sign In"}
+            </Button>
+          </form>
         </div>
       </div>
     </div>

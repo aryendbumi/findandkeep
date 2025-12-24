@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "./ui/card";
 import { cn } from "@/lib/utils";
@@ -7,11 +6,11 @@ import TimelineGrid from "./timeline/TimelineGrid";
 import TimelineLegend from "./timeline/TimelineLegend";
 import MobileTimelineView from "./timeline/MobileTimelineView";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { supabase } from "@/integrations/supabase/client";
+import { getRooms, getBookings } from "@/data/mockData";
 import { useQuery } from "@tanstack/react-query";
 
 const timeSlots = Array.from({ length: 15 }, (_, i) => {
-  const hour = i + 7; // Start from 07:00
+  const hour = i + 7;
   return `${hour.toString().padStart(2, "0")}:00`;
 });
 
@@ -22,15 +21,7 @@ const RoomTimeline = () => {
 
   const { data: rooms = [] } = useQuery({
     queryKey: ["rooms"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("rooms")
-        .select("*")
-        .order("name");
-      
-      if (error) throw error;
-      return data;
-    }
+    queryFn: async () => getRooms()
   });
 
   const { data: bookings = [] } = useQuery({
@@ -42,39 +33,21 @@ const RoomTimeline = () => {
       const endOfDay = new Date(date);
       endOfDay.setHours(23, 59, 59, 999);
 
-      const { data, error } = await supabase
-        .from("bookings")
-        .select(`
-          id,
-          room_id,
-          start_time,
-          end_time,
-          title,
-          attendees,
-          type,
-          zoom_required,
-          priority,
-          user_id,
-          profiles:user_id(
-            first_name,
-            last_name,
-            email
-          )
-        `)
-        .gte("start_time", startOfDay.toISOString())
-        .lte("end_time", endOfDay.toISOString());
+      const allBookings = getBookings();
 
-      if (error) throw error;
-
-      return data.map(booking => ({
-        ...booking,
-        roomId: booking.room_id,
-        startTime: new Date(booking.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
-        endTime: new Date(booking.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
-        organizer: booking.profiles && booking.profiles.first_name 
-          ? `${booking.profiles.first_name} ${booking.profiles.last_name || ''}`
-          : booking.profiles?.email || 'Unknown'
-      }));
+      return allBookings
+        .filter(booking => {
+          const bookingStart = new Date(booking.start_time);
+          const bookingEnd = new Date(booking.end_time);
+          return bookingStart >= startOfDay && bookingEnd <= endOfDay;
+        })
+        .map(booking => ({
+          ...booking,
+          roomId: booking.room_id,
+          startTime: new Date(booking.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+          endTime: new Date(booking.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+          organizer: booking.user_name || booking.user_email || 'Unknown'
+        }));
     }
   });
 
