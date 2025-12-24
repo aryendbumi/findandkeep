@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Routes, Route, Link, useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, UserCircle, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/use-toast";
 import MyBookings from "@/pages/MyBookings";
 import BookedRooms from "@/pages/BookedRooms";
@@ -12,70 +12,28 @@ import RoomManagement from "@/pages/RoomManagement";
 import AvailableRooms from "@/pages/AvailableRooms";
 import RoomTimeline from "@/components/RoomTimeline";
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/login");
-      }
-      setLoading(false);
-    };
-
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
-        navigate("/login");
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  return <>{children}</>;
-};
-
 export const AppContent = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
+  const { user, isAuthenticated, logout, isLoading } = useAuth();
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
-      if (currentUser) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', currentUser.id)
-          .single();
-        
-        setUser(profile);
-      }
-    };
-
-    fetchUser();
-  }, []);
-
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to sign out",
-        variant: "destructive",
-      });
-    } else {
-      navigate("/");
+    if (!isLoading && !isAuthenticated) {
+      navigate("/login");
     }
+  }, [isLoading, isAuthenticated, navigate]);
+
+  const handleLogout = () => {
+    logout();
+    toast({
+      title: "Signed out",
+      description: "You have been successfully signed out.",
+    });
+    navigate("/");
   };
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
 
   if (!user) return null;
 

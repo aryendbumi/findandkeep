@@ -1,6 +1,5 @@
-
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { getBookings } from "@/data/mockData";
 
 export function useRoomBookings(roomId: number, date?: Date) {
   return useQuery({
@@ -14,35 +13,25 @@ export function useRoomBookings(roomId: number, date?: Date) {
       const endOfDay = new Date(date);
       endOfDay.setHours(23, 59, 59, 999);
 
-      const { data, error } = await supabase
-        .from("bookings")
-        .select(`
-          id,
-          title,
-          start_time,
-          end_time,
-          user_id,
-          profiles:user_id(
-            first_name,
-            last_name,
-            email
-          )
-        `)
-        .eq("room_id", roomId)
-        .gte("start_time", startOfDay.toISOString())
-        .lte("end_time", endOfDay.toISOString());
-
-      if (error) throw error;
-
-      return data.map(booking => ({
-        ...booking,
-        start: new Date(booking.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
-        end: new Date(booking.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
-        eventName: booking.title,
-        bookedBy: booking.profiles && booking.profiles.first_name 
-          ? `${booking.profiles.first_name} ${booking.profiles.last_name || ''}`
-          : booking.profiles?.email || 'Unknown'
-      }));
+      const bookings = getBookings();
+      
+      return bookings
+        .filter(booking => {
+          const bookingStart = new Date(booking.start_time);
+          const bookingEnd = new Date(booking.end_time);
+          return (
+            booking.room_id === roomId &&
+            bookingStart >= startOfDay &&
+            bookingEnd <= endOfDay
+          );
+        })
+        .map(booking => ({
+          ...booking,
+          start: new Date(booking.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+          end: new Date(booking.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+          eventName: booking.title,
+          bookedBy: booking.user_name || booking.user_email || 'Unknown'
+        }));
     },
     enabled: !!roomId && !!date
   });
