@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { getRooms } from "@/data/mockData";
+import { useRooms } from "@/hooks/useRooms";
 import { RoomCard } from "@/components/RoomCard";
 import { RoomFilter } from "@/components/RoomFilter";
 
 const AvailableRooms = () => {
-  const rooms = getRooms();
+  const { data: rooms = [], isLoading } = useRooms();
   const [searchQuery, setSearchQuery] = useState("");
   const [capacityFilter, setCapacityFilter] = useState("any");
 
@@ -18,7 +18,7 @@ const AvailableRooms = () => {
 
   const filteredRooms = rooms.filter(room => {
     const matchesSearch = room.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         room.description?.toLowerCase().includes(searchQuery.toLowerCase());
+                         room.location?.toLowerCase().includes(searchQuery.toLowerCase());
     
     if (!matchesSearch) return false;
 
@@ -36,6 +36,14 @@ const AvailableRooms = () => {
         return true;
     }
   });
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <p>Loading rooms...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -58,9 +66,9 @@ const AvailableRooms = () => {
               <RoomCard 
                 key={room.id}
                 name={room.name}
-                description={room.description || ""}
+                description={room.location || ""}
                 capacity={room.capacity}
-                image_url={room.image_url || ""}
+                image_url=""
                 amenities={room.amenities || []}
               />
             ))}
