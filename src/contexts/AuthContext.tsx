@@ -1,63 +1,145 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { User, Session } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 
-interface User {
+type AppRole = "superadmin" | "organizer";
+
+interface AuthUser {
   id: string;
   email: string;
-  first_name: string;
-  last_name: string;
-  role: "Super Admin" | "Meeting Organizer";
+  first_name: string | null;
+  last_name: string | null;
+  role: AppRole;
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: AuthUser | null;
+  session: Session | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<{ error?: string }>;
-  logout: () => void;
+  signup: (email: string, password: string, firstName?: string, lastName?: string) => Promise<{ error?: string }>;
+  logout: () => Promise<void>;
   isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const STORAGE_KEY = "mock_auth_user";
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem(STORAGE_KEY);
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .maybeSingle();
+
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (profile) {
+        setUser({
+          id: profile.id,
+          email: profile.email,
+          first_name: profile.first_name,
+          last_name: profile.last_name,
+          role: (roleData?.role as AppRole) || "organizer",
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
     }
-    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        
+        if (session?.user) {
+          // Defer profile fetch to avoid deadlock
+          setTimeout(() => {
+            fetchUserProfile(session.user.id);
+          }, 0);
+        } else {
+          setUser(null);
+        }
+        
+        setIsLoading(false);
+      }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session?.user) {
+        fetchUserProfile(session.user.id);
+      }
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (email: string, _password: string): Promise<{ error?: string }> => {
-    // Mock login - accept any credentials
-    const mockUser: User = {
-      id: "mock-user-" + Date.now(),
+  const login = async (email: string, password: string): Promise<{ error?: string }> => {
+    const { error } = await supabase.auth.signInWithPassword({
       email,
-      first_name: email.split("@")[0],
-      last_name: "",
-      role: email.includes("admin") ? "Super Admin" : "Meeting Organizer",
-    };
+      password,
+    });
     
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(mockUser));
-    setUser(mockUser);
+    if (error) {
+      return { error: error.message };
+    }
     return {};
   };
 
-  const logout = () => {
-    localStorage.removeItem(STORAGE_KEY);
+  const signup = async (
+    email: string, 
+    password: string, 
+    firstName?: string, 
+    lastName?: string
+  ): Promise<{ error?: string }> => {
+    const redirectUrl = `${window.location.origin}/`;
+    
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: redirectUrl,
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+        },
+      },
+    });
+    
+    if (error) {
+      return { error: error.message };
+    }
+    return {};
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
+    setSession(null);
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: !!user,
+        session,
+        isAuthenticated: !!session,
         login,
+        signup,
         logout,
         isLoading,
       }}

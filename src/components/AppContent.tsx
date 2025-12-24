@@ -61,7 +61,7 @@ export const AppContent = () => {
               <Link to="/dashboard/my-bookings" className="text-sm font-medium hover:text-primary">
                 My Bookings
               </Link>
-              {user.role === "Super Admin" && (
+              {user.role === "superadmin" && (
                 <Link to="/dashboard/room-management" className="text-sm font-medium hover:text-primary">
                   Room Management
                 </Link>
@@ -103,7 +103,7 @@ export const AppContent = () => {
                       <Link to="/dashboard/my-account" className="text-sm font-medium hover:text-primary block py-2">
                         My Account
                       </Link>
-                      {user.role === "Super Admin" && (
+                      {user.role === "superadmin" && (
                         <Link to="/dashboard/room-management" className="text-sm font-medium hover:text-primary block py-2">
                           Room Management
                         </Link>

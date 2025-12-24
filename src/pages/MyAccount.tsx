@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { User, History, UserRound, Bell, Trash2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,67 +25,49 @@ import {
 const MyAccount = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [loginHistory, setLoginHistory] = useState([]);
-  const [userRole, setUserRole] = useState("");
-  const [recentBookings, setRecentBookings] = useState([]);
+  const [recentBookings, setRecentBookings] = useState<any[]>([]);
 
   useEffect(() => {
     loadUserProfile();
-    loadLoginHistory();
     loadRecentBookings();
   }, []);
 
   const loadUserProfile = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) return;
 
       const { data: profile } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.id)
-        .single();
+        .eq('id', authUser.id)
+        .maybeSingle();
 
       if (profile) {
         setFirstName(profile.first_name || '');
         setLastName(profile.last_name || '');
-        setUserRole(profile.role || '');
       }
     } catch (error: any) {
       console.error('Error loading profile:', error);
     }
   };
 
-  const loadLoginHistory = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('login_history')
-        .select('*')
-        .order('login_timestamp', { ascending: false })
-        .limit(5);
-
-      if (error) throw error;
-      setLoginHistory(data || []);
-    } catch (error: any) {
-      console.error('Error loading login history:', error);
-    }
-  };
-
   const loadRecentBookings = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) return;
 
       const { data, error } = await supabase
         .from('bookings')
         .select('*, rooms(name)')
-        .eq('user_id', user.id)
+        .eq('user_id', authUser.id)
         .order('created_at', { ascending: false })
         .limit(5);
 
@@ -99,8 +82,8 @@ const MyAccount = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No user found');
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) throw new Error('No user found');
 
       const { error } = await supabase
         .from('profiles')
@@ -109,7 +92,7 @@ const MyAccount = () => {
           last_name: lastName,
           updated_at: new Date().toISOString(),
         })
-        .eq('id', user.id);
+        .eq('id', authUser.id);
 
       if (error) throw error;
 
@@ -131,18 +114,13 @@ const MyAccount = () => {
   const handleAccountDeletion = async () => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.admin.deleteUser(
-        (await supabase.auth.getUser()).data.user?.id || ''
-      );
-
-      if (error) throw error;
-
+      // Note: Admin deletion requires service role, user can only sign out
       await supabase.auth.signOut();
       navigate('/');
       
       toast({
-        title: "Account Deleted",
-        description: "Your account has been successfully deleted",
+        title: "Signed Out",
+        description: "You have been signed out. Contact admin to delete your account.",
       });
     } catch (error: any) {
       toast({
@@ -192,13 +170,13 @@ const MyAccount = () => {
   };
 
   const handleResetPassword = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user?.email) return;
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (!authUser?.email) return;
 
     try {
       setLoading(true);
-      const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
-        redirectTo: `${window.location.origin}/my-account`,
+      const { error } = await supabase.auth.resetPasswordForEmail(authUser.email, {
+        redirectTo: `${window.location.origin}/dashboard/my-account`,
       });
 
       if (error) throw error;
@@ -226,12 +204,17 @@ const MyAccount = () => {
     });
   };
 
+  const getRoleDisplay = () => {
+    if (!user) return '';
+    return user.role === 'superadmin' ? 'Super Admin' : 'Meeting Organizer';
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">My Account</h1>
       
       <Tabs defaultValue="profile" className="w-full max-w-2xl mx-auto">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="profile">
             <UserRound className="h-4 w-4 mr-2" />
             Profile
@@ -243,10 +226,6 @@ const MyAccount = () => {
           <TabsTrigger value="activity">
             <User className="h-4 w-4 mr-2" />
             Activity
-          </TabsTrigger>
-          <TabsTrigger value="preferences">
-            <Bell className="h-4 w-4 mr-2" />
-            Preferences
           </TabsTrigger>
         </TabsList>
 
@@ -280,7 +259,7 @@ const MyAccount = () => {
 
                 <div className="space-y-2">
                   <Label>Role</Label>
-                  <p className="text-sm text-muted-foreground">{userRole}</p>
+                  <p className="text-sm text-muted-foreground">{getRoleDisplay()}</p>
                 </div>
 
                 <Button type="submit" disabled={loading}>
@@ -355,7 +334,7 @@ const MyAccount = () => {
                 </Button>
               </form>
 
-              <div className="pt-4 border-t">
+              <div className="pt-4 border-t mt-4">
                 <Button
                   variant="outline"
                   onClick={handleResetPassword}
@@ -371,34 +350,16 @@ const MyAccount = () => {
         <TabsContent value="activity">
           <Card>
             <CardHeader>
-              <CardTitle>Account Activity</CardTitle>
-              <CardDescription>View your recent activity and login history</CardDescription>
+              <CardTitle>Recent Bookings</CardTitle>
+              <CardDescription>View your recent booking activity</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <h3 className="font-medium mb-4">Recent Login History</h3>
-                <ScrollArea className="h-[200px] rounded-md border p-4">
-                  {loginHistory.map((login: any) => (
-                    <div key={login.id} className="mb-4 last:mb-0">
-                      <p className="text-sm font-medium">
-                        {new Date(login.login_timestamp).toLocaleString()}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        IP: {login.ip_address || 'Unknown'}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Browser: {login.user_agent || 'Unknown'}
-                      </p>
-                    </div>
-                  ))}
-                </ScrollArea>
-              </div>
-
-              <div>
-                <h3 className="font-medium mb-4">Recent Bookings</h3>
-                <ScrollArea className="h-[200px] rounded-md border p-4">
-                  {recentBookings.map((booking: any) => (
-                    <div key={booking.id} className="mb-4 last:mb-0">
+            <CardContent>
+              <ScrollArea className="h-[300px] rounded-md border p-4">
+                {recentBookings.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No recent bookings</p>
+                ) : (
+                  recentBookings.map((booking: any) => (
+                    <div key={booking.id} className="mb-4 last:mb-0 p-3 bg-muted rounded-lg">
                       <p className="text-sm font-medium">{booking.title}</p>
                       <p className="text-sm text-muted-foreground">
                         Room: {booking.rooms?.name}
@@ -407,34 +368,9 @@ const MyAccount = () => {
                         {new Date(booking.start_time).toLocaleString()}
                       </p>
                     </div>
-                  ))}
-                </ScrollArea>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="preferences">
-          <Card>
-            <CardHeader>
-              <CardTitle>Email Preferences</CardTitle>
-              <CardDescription>Manage your notification settings</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">Email Notifications</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Receive email notifications for booking updates
-                  </p>
-                </div>
-                <Button
-                  variant={emailNotifications ? "default" : "outline"}
-                  onClick={handleEmailPreferences}
-                >
-                  {emailNotifications ? "Enabled" : "Disabled"}
-                </Button>
-              </div>
+                  ))
+                )}
+              </ScrollArea>
             </CardContent>
           </Card>
         </TabsContent>

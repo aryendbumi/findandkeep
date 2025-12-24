@@ -35,7 +35,7 @@ export function BookingList({ bookings }: BookingListProps) {
               </div>
               <div className="flex items-center gap-2">
                 <Users className="w-4 h-4" />
-                <span>{booking.attendees} attendees</span>
+                <span>Booked by {booking.organizer}</span>
               </div>
             </div>
           </CardContent>

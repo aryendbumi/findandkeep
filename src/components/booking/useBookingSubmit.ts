@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { saveBooking, getRooms, LocalBooking } from "@/data/mockData";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
 export const useBookingSubmit = (roomName: string, onClose?: () => void) => {
@@ -22,9 +22,9 @@ export const useBookingSubmit = (roomName: string, onClose?: () => void) => {
     isExternal: boolean;
     priority: string;
   }) => {
-    const { date, startTime, endTime, agenda, attendees, needsZoom, isExternal, priority } = formData;
+    const { date, startTime, endTime, agenda, priority } = formData;
 
-    if (!date || !startTime || !endTime || !agenda || !attendees || !priority) {
+    if (!date || !startTime || !endTime || !agenda || !priority) {
       toast({
         variant: "destructive",
         title: "Missing Required Fields",
@@ -45,40 +45,41 @@ export const useBookingSubmit = (roomName: string, onClose?: () => void) => {
     setIsSubmitting(true);
     
     try {
-      const rooms = getRooms();
-      const room = rooms.find(r => r.name === roomName);
+      // Find room by name
+      const { data: rooms, error: roomError } = await supabase
+        .from("rooms")
+        .select("id")
+        .eq("name", roomName)
+        .maybeSingle();
 
-      if (!room) throw new Error("Room not found");
+      if (roomError) throw roomError;
+      if (!rooms) throw new Error("Room not found");
 
       const startDateTime = new Date(date);
       const [startHours, startMinutes] = startTime.split(':').map(Number);
-      startDateTime.setHours(startHours, startMinutes);
+      startDateTime.setHours(startHours, startMinutes, 0, 0);
 
       const endDateTime = new Date(date);
       const [endHours, endMinutes] = endTime.split(':').map(Number);
-      endDateTime.setHours(endHours, endMinutes);
+      endDateTime.setHours(endHours, endMinutes, 0, 0);
 
-      const newBooking: LocalBooking = {
-        id: `booking-${Date.now()}`,
-        room_id: room.id,
-        user_id: user.id,
-        user_email: user.email,
-        user_name: `${user.first_name} ${user.last_name}`.trim(),
-        title: agenda,
-        start_time: startDateTime.toISOString(),
-        end_time: endDateTime.toISOString(),
-        attendees: parseInt(attendees),
-        type: isExternal ? 'External' : 'Internal',
-        zoom_required: needsZoom,
-        priority: priority.toLowerCase(),
-        created_at: new Date().toISOString(),
-      };
+      const { error } = await supabase
+        .from("bookings")
+        .insert({
+          room_id: rooms.id,
+          user_id: user.id,
+          title: agenda,
+          start_time: startDateTime.toISOString(),
+          end_time: endDateTime.toISOString(),
+          priority: priority.toLowerCase(),
+        });
 
-      saveBooking(newBooking);
+      if (error) throw error;
       
       // Invalidate queries to refresh the data
       queryClient.invalidateQueries({ queryKey: ["all-bookings"] });
-      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["my-bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["timeline-bookings"] });
       queryClient.invalidateQueries({ queryKey: ["room-bookings"] });
 
       toast({

@@ -6,7 +6,8 @@ import TimelineGrid from "./timeline/TimelineGrid";
 import TimelineLegend from "./timeline/TimelineLegend";
 import MobileTimelineView from "./timeline/MobileTimelineView";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { getRooms, getBookings } from "@/data/mockData";
+import { useRooms } from "@/hooks/useRooms";
+import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 
 const timeSlots = Array.from({ length: 15 }, (_, i) => {
@@ -19,13 +20,10 @@ const RoomTimeline = () => {
   const [isExpanded, setIsExpanded] = useState(true);
   const isMobile = useIsMobile();
 
-  const { data: rooms = [] } = useQuery({
-    queryKey: ["rooms"],
-    queryFn: async () => getRooms()
-  });
+  const { data: rooms = [] } = useRooms();
 
   const { data: bookings = [] } = useQuery({
-    queryKey: ["bookings", date],
+    queryKey: ["timeline-bookings", date.toISOString()],
     queryFn: async () => {
       const startOfDay = new Date(date);
       startOfDay.setHours(0, 0, 0, 0);
@@ -33,21 +31,35 @@ const RoomTimeline = () => {
       const endOfDay = new Date(date);
       endOfDay.setHours(23, 59, 59, 999);
 
-      const allBookings = getBookings();
+      const { data, error } = await supabase
+        .from("bookings")
+        .select("*")
+        .gte("start_time", startOfDay.toISOString())
+        .lte("end_time", endOfDay.toISOString());
 
-      return allBookings
-        .filter(booking => {
-          const bookingStart = new Date(booking.start_time);
-          const bookingEnd = new Date(booking.end_time);
-          return bookingStart >= startOfDay && bookingEnd <= endOfDay;
-        })
-        .map(booking => ({
+      if (error) throw error;
+
+      // Fetch profiles
+      const userIds = [...new Set(data.map(b => b.user_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, email")
+        .in("id", userIds);
+
+      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+
+      return data.map(booking => {
+        const profile = profileMap.get(booking.user_id);
+        return {
           ...booking,
           roomId: booking.room_id,
           startTime: new Date(booking.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
           endTime: new Date(booking.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
-          organizer: booking.user_name || booking.user_email || 'Unknown'
-        }));
+          organizer: profile 
+            ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email
+            : 'Unknown'
+        };
+      });
     }
   });
 
