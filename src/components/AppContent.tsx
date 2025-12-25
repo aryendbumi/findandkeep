@@ -9,9 +9,9 @@ import MyBookings from "@/pages/MyBookings";
 import BookedRooms from "@/pages/BookedRooms";
 import MyAccount from "@/pages/MyAccount";
 import RoomManagement from "@/pages/RoomManagement";
+import UserManagement from "@/pages/UserManagement";
 import AvailableRooms from "@/pages/AvailableRooms";
 import RoomTimeline from "@/components/RoomTimeline";
-
 export const AppContent = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout, isLoading } = useAuth();
@@ -62,9 +62,14 @@ export const AppContent = () => {
                 My Bookings
               </Link>
               {user.role === "superadmin" && (
-                <Link to="/dashboard/room-management" className="text-sm font-medium hover:text-primary">
-                  Room Management
-                </Link>
+                <>
+                  <Link to="/dashboard/room-management" className="text-sm font-medium hover:text-primary">
+                    Room Management
+                  </Link>
+                  <Link to="/dashboard/user-management" className="text-sm font-medium hover:text-primary">
+                    User Management
+                  </Link>
+                </>
               )}
             </div>
             
@@ -104,9 +109,14 @@ export const AppContent = () => {
                         My Account
                       </Link>
                       {user.role === "superadmin" && (
-                        <Link to="/dashboard/room-management" className="text-sm font-medium hover:text-primary block py-2">
-                          Room Management
-                        </Link>
+                        <>
+                          <Link to="/dashboard/room-management" className="text-sm font-medium hover:text-primary block py-2">
+                            Room Management
+                          </Link>
+                          <Link to="/dashboard/user-management" className="text-sm font-medium hover:text-primary block py-2">
+                            User Management
+                          </Link>
+                        </>
                       )}
                       <button
                         onClick={handleLogout}
@@ -130,6 +140,7 @@ export const AppContent = () => {
           <Route path="/booked-rooms" element={<BookedRooms />} />
           <Route path="/my-account" element={<MyAccount />} />
           <Route path="/room-management" element={<RoomManagement />} />
+          <Route path="/user-management" element={<UserManagement />} />
         </Routes>
       </main>
     </div>
