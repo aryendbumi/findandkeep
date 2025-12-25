@@ -84,13 +84,12 @@ export default function UserManagement() {
         description: "User role has been successfully updated.",
       });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: "Error",
         description: "Failed to update user role. Please try again.",
         variant: "destructive",
       });
-      console.error("Error updating role:", error);
     },
   });
 
