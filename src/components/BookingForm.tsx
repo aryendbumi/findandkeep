@@ -8,6 +8,7 @@ import { BookingPriority } from "./booking/BookingPriority";
 import DatePickerCollapsible from "./DatePickerCollapsible";
 import { Loader2 } from "lucide-react";
 import { useBookingSubmit } from "./booking/useBookingSubmit";
+import { useRoomBookings } from "@/hooks/useRoomBookings";
 
 interface BookingFormProps {
   roomName: string;
@@ -26,6 +27,9 @@ export function BookingForm({ roomName, capacity, onClose }: BookingFormProps) {
   const [priority, setPriority] = useState("");
   
   const { handleSubmit, isSubmitting } = useBookingSubmit(roomName, onClose);
+  
+  // Fetch real bookings for the selected date
+  const { data: roomBookings = [] } = useRoomBookings(undefined, date);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +45,17 @@ export function BookingForm({ roomName, capacity, onClose }: BookingFormProps) {
     });
   };
 
-  const timeSlots = date ? getMockTimeSlots(date) : [];
+  // Filter bookings for this room and transform to time slot format
+  const timeSlots = roomBookings
+    .filter(booking => booking.roomName === roomName)
+    .map(booking => ({
+      start: booking.start,
+      end: booking.end,
+      duration: calculateDuration(booking.start_time, booking.end_time),
+      isBooked: true,
+      bookedBy: booking.bookedBy,
+      eventName: booking.eventName
+    }));
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
@@ -105,64 +119,18 @@ export function BookingForm({ roomName, capacity, onClose }: BookingFormProps) {
   );
 }
 
-// Helper function for mock data
-const getMockTimeSlots = (date: Date) => [
-  { start: "07:00", end: "09:00", duration: "2 hours", isBooked: false },
-  { 
-    start: "09:00", 
-    end: "13:00", 
-    duration: "4 hours", 
-    isBooked: true,
-    bookedBy: "John",
-    eventName: "Team Meeting"
-  },
-  { start: "13:00", end: "14:30", duration: "1.5 hours", isBooked: false },
-  {
-    start: "14:30",
-    end: "16:00",
-    duration: "1.5 hours",
-    isBooked: true,
-    bookedBy: "Sarah",
-    eventName: "Client Call"
-  },
-  { 
-    start: "16:00", 
-    end: "17:00", 
-    duration: "1 hour", 
-    isBooked: true,
-    bookedBy: "Mike",
-    eventName: "Sprint Planning"
-  },
-  { 
-    start: "17:00", 
-    end: "18:00", 
-    duration: "1 hour", 
-    isBooked: true,
-    bookedBy: "Emma",
-    eventName: "Design Review"
-  },
-  { 
-    start: "18:00", 
-    end: "19:00", 
-    duration: "1 hour", 
-    isBooked: true,
-    bookedBy: "Alex",
-    eventName: "1:1 Meeting"
-  },
-  { 
-    start: "19:00", 
-    end: "20:00", 
-    duration: "1 hour", 
-    isBooked: true,
-    bookedBy: "Lisa",
-    eventName: "Project Sync"
-  },
-  { 
-    start: "20:00", 
-    end: "21:00", 
-    duration: "1 hour", 
-    isBooked: true,
-    bookedBy: "Tom",
-    eventName: "Team Retrospective"
+// Helper function to calculate duration
+function calculateDuration(startTime: string, endTime: string): string {
+  const start = new Date(startTime);
+  const end = new Date(endTime);
+  const diffMs = end.getTime() - start.getTime();
+  const diffHours = diffMs / (1000 * 60 * 60);
+  
+  if (diffHours < 1) {
+    return `${Math.round(diffHours * 60)} mins`;
+  } else if (diffHours === 1) {
+    return "1 hour";
+  } else {
+    return `${diffHours} hours`;
   }
-];
+}
