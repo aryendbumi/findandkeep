@@ -89,11 +89,12 @@ export const useBookingSubmit = (roomName: string, onClose?: () => void) => {
 
       navigate("/dashboard");
       if (onClose) onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      console.error("Booking error:", error);
       toast({
         variant: "destructive",
         title: "Booking Failed",
-        description: error.message || "There was an error while booking the room. Please try again.",
+        description: "There was an error while booking the room. Please try again.",
       });
     } finally {
       setIsSubmitting(false);
