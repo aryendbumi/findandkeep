@@ -49,20 +49,22 @@ export default function MyBookings() {
 
       refetch();
     } catch (error) {
+      console.error("Booking deletion error:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to delete booking. Please try again.",
+        description: "Failed to delete booking. Please try again.",
       });
     }
   };
 
   if (error) {
+    console.error("Booking loading error:", error);
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center py-8">
           <h1 className="text-2xl font-bold mb-4">Error Loading Bookings</h1>
-          <p className="text-red-500">{error.message}</p>
+          <p className="text-red-500">Unable to load bookings. Please try again later.</p>
         </div>
       </div>
     );

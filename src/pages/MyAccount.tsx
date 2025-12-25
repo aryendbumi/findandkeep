@@ -100,10 +100,11 @@ const MyAccount = () => {
         title: "Success",
         description: "Profile updated successfully",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      console.error("Profile update error:", error);
       toast({
         title: "Error",
-        description: error.message,
+        description: "Failed to update profile. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -122,10 +123,11 @@ const MyAccount = () => {
         title: "Signed Out",
         description: "You have been signed out. Contact admin to delete your account.",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      console.error("Account deletion error:", error);
       toast({
         title: "Error",
-        description: error.message,
+        description: "Failed to process request. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -158,10 +160,11 @@ const MyAccount = () => {
       });
       setNewPassword("");
       setConfirmPassword("");
-    } catch (error: any) {
+    } catch (error: unknown) {
+      console.error("Password change error:", error);
       toast({
         title: "Error",
-        description: error.message,
+        description: "Failed to change password. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -185,10 +188,11 @@ const MyAccount = () => {
         title: "Success",
         description: "Password reset email sent",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      console.error("Password reset error:", error);
       toast({
         title: "Error",
-        description: error.message,
+        description: "Failed to send password reset email. Please try again.",
         variant: "destructive",
       });
     } finally {
