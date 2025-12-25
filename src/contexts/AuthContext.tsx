@@ -52,8 +52,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           role: (roleData?.role as AppRole) || "organizer",
         });
       }
-    } catch (error) {
-      console.error("Error fetching user profile:", error);
+    } catch {
+      // Profile fetch failed - user will remain unauthenticated
     }
   };
 
