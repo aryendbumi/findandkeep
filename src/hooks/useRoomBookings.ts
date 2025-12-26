@@ -29,11 +29,11 @@ export function useRoomBookings(roomId?: number, date?: Date | string) {
 
       if (error) throw error;
 
-      // Fetch profiles separately
+      // Fetch profile directory (names only, no PII) for display
       const userIds = [...new Set(data.map(b => b.user_id))];
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, first_name, last_name, email")
+      const { data: directory } = await supabase
+        .from("profile_directory")
+        .select("id, first_name, last_name")
         .in("id", userIds);
 
       // Fetch rooms separately
@@ -43,11 +43,11 @@ export function useRoomBookings(roomId?: number, date?: Date | string) {
         .select("id, name")
         .in("id", roomIds);
 
-      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+      const directoryMap = new Map(directory?.map(p => [p.id, p]) || []);
       const roomMap = new Map(rooms?.map(r => [r.id, r]) || []);
 
       return data.map(booking => {
-        const profile = profileMap.get(booking.user_id);
+        const dirEntry = directoryMap.get(booking.user_id);
         const room = roomMap.get(booking.room_id);
         return {
           ...booking,
@@ -55,8 +55,8 @@ export function useRoomBookings(roomId?: number, date?: Date | string) {
           start: new Date(booking.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
           end: new Date(booking.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
           eventName: booking.title,
-          bookedBy: profile 
-            ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email
+          bookedBy: dirEntry 
+            ? `${dirEntry.first_name || ''} ${dirEntry.last_name || ''}`.trim() || 'Unknown'
             : 'Unknown'
         };
       });

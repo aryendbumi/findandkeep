@@ -16,17 +16,17 @@ export function useBookings() {
 
       if (error) throw error;
 
-      // Fetch profiles separately to avoid join issues
+      // Fetch profile directory (names only, no PII) for display
       const userIds = [...new Set(data.map(b => b.user_id))];
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, first_name, last_name, email")
+      const { data: directory } = await supabase
+        .from("profile_directory")
+        .select("id, first_name, last_name")
         .in("id", userIds);
 
-      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+      const directoryMap = new Map(directory?.map(p => [p.id, p]) || []);
 
       return data.map(booking => {
-        const profile = profileMap.get(booking.user_id);
+        const dirEntry = directoryMap.get(booking.user_id);
         return {
           ...booking,
           roomName: booking.rooms?.name || "Unknown Room",
@@ -41,10 +41,10 @@ export function useBookings() {
             minute: '2-digit', 
             hour12: false 
           }),
-          organizer: profile 
-            ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email
+          organizer: dirEntry 
+            ? `${dirEntry.first_name || ''} ${dirEntry.last_name || ''}`.trim() || 'Unknown'
             : 'Unknown',
-          profiles: profile,
+          profiles: dirEntry ? { first_name: dirEntry.first_name, last_name: dirEntry.last_name, email: '' } : null,
         };
       }) as Booking[];
     }
@@ -68,9 +68,9 @@ export function useMyBookings(userId: string | undefined) {
 
       if (error) throw error;
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("id, first_name, last_name, email")
+      const { data: dirEntry } = await supabase
+        .from("profile_directory")
+        .select("id, first_name, last_name")
         .eq("id", userId)
         .maybeSingle();
 
@@ -88,10 +88,10 @@ export function useMyBookings(userId: string | undefined) {
           minute: '2-digit', 
           hour12: false 
         }),
-        organizer: profile 
-          ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email
+        organizer: dirEntry 
+          ? `${dirEntry.first_name || ''} ${dirEntry.last_name || ''}`.trim() || 'Unknown'
           : 'Unknown',
-        profiles: profile,
+        profiles: dirEntry ? { first_name: dirEntry.first_name, last_name: dirEntry.last_name, email: '' } : null,
       })) as Booking[];
     },
     enabled: !!userId,
