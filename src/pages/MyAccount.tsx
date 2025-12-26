@@ -54,8 +54,8 @@ const MyAccount = () => {
         setFirstName(profile.first_name || '');
         setLastName(profile.last_name || '');
       }
-    } catch (error: any) {
-      console.error('Error loading profile:', error);
+    } catch {
+      // Profile loading failed silently
     }
   };
 
@@ -73,8 +73,8 @@ const MyAccount = () => {
 
       if (error) throw error;
       setRecentBookings(data || []);
-    } catch (error: any) {
-      console.error('Error loading recent bookings:', error);
+    } catch {
+      // Recent bookings loading failed silently
     }
   };
 
@@ -100,8 +100,7 @@ const MyAccount = () => {
         title: "Success",
         description: "Profile updated successfully",
       });
-    } catch (error: unknown) {
-      console.error("Profile update error:", error);
+    } catch {
       toast({
         title: "Error",
         description: "Failed to update profile. Please try again.",
@@ -123,8 +122,7 @@ const MyAccount = () => {
         title: "Signed Out",
         description: "You have been signed out. Contact admin to delete your account.",
       });
-    } catch (error: unknown) {
-      console.error("Account deletion error:", error);
+    } catch {
       toast({
         title: "Error",
         description: "Failed to process request. Please try again.",
@@ -160,8 +158,7 @@ const MyAccount = () => {
       });
       setNewPassword("");
       setConfirmPassword("");
-    } catch (error: unknown) {
-      console.error("Password change error:", error);
+    } catch {
       toast({
         title: "Error",
         description: "Failed to change password. Please try again.",
@@ -188,8 +185,7 @@ const MyAccount = () => {
         title: "Success",
         description: "Password reset email sent",
       });
-    } catch (error: unknown) {
-      console.error("Password reset error:", error);
+    } catch {
       toast({
         title: "Error",
         description: "Failed to send password reset email. Please try again.",
