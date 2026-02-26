@@ -12,6 +12,7 @@ import RoomManagement from "@/pages/RoomManagement";
 import UserManagement from "@/pages/UserManagement";
 import AvailableRooms from "@/pages/AvailableRooms";
 import RoomTimeline from "@/components/RoomTimeline";
+import BookingAssistant from "@/pages/BookingAssistant";
 export const AppContent = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout, isLoading } = useAuth();
@@ -60,6 +61,9 @@ export const AppContent = () => {
               </Link>
               <Link to="/dashboard/my-bookings" className="text-sm font-medium hover:text-primary">
                 My Bookings
+              </Link>
+              <Link to="/dashboard/assistant" className="text-sm font-medium hover:text-primary">
+                🤖 Assistant
               </Link>
               {user.role === "superadmin" && (
                 <>
@@ -141,6 +145,7 @@ export const AppContent = () => {
           <Route path="/my-account" element={<MyAccount />} />
           <Route path="/room-management" element={<RoomManagement />} />
           <Route path="/user-management" element={<UserManagement />} />
+          <Route path="/assistant" element={<BookingAssistant />} />
         </Routes>
       </main>
     </div>
