@@ -20,7 +20,6 @@ function sanitizeAmenities(amenitiesString: string): string[] {
 }
 
 function getSafeErrorMessage(error: unknown, defaultMessage: string): string {
-  // Don't expose raw database error messages to users
   return defaultMessage;
 }
 
@@ -28,39 +27,47 @@ export function useRoomOperations(onSuccess: () => void) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const handleRoomSubmit = async (values: RoomFormData, roomId?: number) => {
+  const uploadPhoto = async (file: File, roomName: string): Promise<string | null> => {
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Date.now()}-${roomName.replace(/\s+/g, "-")}.${fileExt}`;
+    const { error } = await supabase.storage.from("room-photos").upload(fileName, file);
+    if (error) throw error;
+    const { data: urlData } = supabase.storage.from("room-photos").getPublicUrl(fileName);
+    return urlData.publicUrl;
+  };
+
+  const handleRoomSubmit = async (values: RoomFormData, roomId?: number, photoFile?: File | null) => {
     setIsSubmitting(true);
     try {
       const amenitiesArray = sanitizeAmenities(values.amenities || "");
 
-      const roomData = {
+      let photoUrl: string | undefined;
+      if (photoFile) {
+        photoUrl = (await uploadPhoto(photoFile, values.name)) ?? undefined;
+      }
+
+      const roomData: any = {
         name: values.name,
         description: values.description,
         capacity: values.capacity,
         amenities: amenitiesArray,
       };
 
+      if (photoUrl) {
+        roomData.photo_url = photoUrl;
+      }
+
       if (roomId) {
         const { error } = await supabase
           .from("rooms")
           .update(roomData)
           .eq("id", roomId);
-
         if (error) throw error;
-
-        toast({
-          title: "Success",
-          description: "Room updated successfully",
-        });
+        toast({ title: "Success", description: "Room updated successfully" });
       } else {
         const { error } = await supabase.from("rooms").insert([roomData]);
-
         if (error) throw error;
-
-        toast({
-          title: "Success",
-          description: "Room created successfully",
-        });
+        toast({ title: "Success", description: "Room created successfully" });
       }
 
       onSuccess();

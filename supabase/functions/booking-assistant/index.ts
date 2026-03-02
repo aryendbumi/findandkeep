@@ -68,7 +68,7 @@ const tools = [
 async function handleToolCall(
   fnName: string,
   args: Record<string, unknown>,
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string
 ) {
   if (fnName === "search_available_rooms") {

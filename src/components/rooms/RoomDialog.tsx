@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
+  Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { RoomForm, type RoomFormData } from "./RoomForm";
 import { useRoomOperations } from "@/hooks/useRoomOperations";
@@ -17,10 +14,7 @@ interface RoomDialogProps {
 
 const RoomDialog = ({ open, onOpenChange, room, onSuccess }: RoomDialogProps) => {
   const [defaultValues, setDefaultValues] = useState<RoomFormData>({
-    name: "",
-    description: "",
-    capacity: 1,
-    amenities: "",
+    name: "", description: "", capacity: 1, amenities: "",
   });
 
   const { handleRoomSubmit, isSubmitting } = useRoomOperations(onSuccess);
@@ -34,17 +28,12 @@ const RoomDialog = ({ open, onOpenChange, room, onSuccess }: RoomDialogProps) =>
         amenities: room.amenities?.join(", ") || "",
       });
     } else {
-      setDefaultValues({
-        name: "",
-        description: "",
-        capacity: 1,
-        amenities: "",
-      });
+      setDefaultValues({ name: "", description: "", capacity: 1, amenities: "" });
     }
   }, [room]);
 
-  const onSubmit = (values: RoomFormData) => {
-    handleRoomSubmit(values, room?.id);
+  const onSubmit = (values: RoomFormData, photoFile?: File | null) => {
+    handleRoomSubmit(values, room?.id, photoFile);
   };
 
   return (
@@ -58,6 +47,7 @@ const RoomDialog = ({ open, onOpenChange, room, onSuccess }: RoomDialogProps) =>
           onSubmit={onSubmit}
           onCancel={() => onOpenChange(false)}
           isSubmitting={isSubmitting}
+          currentPhotoUrl={room?.photo_url}
         />
       </DialogContent>
     </Dialog>

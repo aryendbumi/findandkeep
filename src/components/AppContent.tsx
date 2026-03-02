@@ -13,6 +13,8 @@ import UserManagement from "@/pages/UserManagement";
 import AvailableRooms from "@/pages/AvailableRooms";
 import RoomTimeline from "@/components/RoomTimeline";
 import BookingAssistant from "@/pages/BookingAssistant";
+import BookingManagement from "@/pages/BookingManagement";
+
 export const AppContent = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout, isLoading } = useAuth();
@@ -25,10 +27,7 @@ export const AppContent = () => {
 
   const handleLogout = () => {
     logout();
-    toast({
-      title: "Signed out",
-      description: "You have been successfully signed out.",
-    });
+    toast({ title: "Signed out", description: "You have been successfully signed out." });
     navigate("/");
   };
 
@@ -40,9 +39,7 @@ export const AppContent = () => {
 
   const DashboardHome = () => (
     <div className="space-y-6">
-      <div className="border-b pb-4">
-        <RoomTimeline />
-      </div>
+      <div className="border-b pb-4"><RoomTimeline /></div>
       <AvailableRooms />
     </div>
   );
@@ -53,81 +50,47 @@ export const AppContent = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div className="flex gap-4">
-              <Link to="/dashboard" className="text-sm font-medium hover:text-primary">
-                Available Rooms
-              </Link>
-              <Link to="/dashboard/booked-rooms" className="text-sm font-medium hover:text-primary">
-                Booked Rooms
-              </Link>
-              <Link to="/dashboard/my-bookings" className="text-sm font-medium hover:text-primary">
-                My Bookings
-              </Link>
-              <Link to="/dashboard/assistant" className="text-sm font-medium hover:text-primary">
-                🤖 Assistant
-              </Link>
+              <Link to="/dashboard" className="text-sm font-medium hover:text-primary">Available Rooms</Link>
+              <Link to="/dashboard/booked-rooms" className="text-sm font-medium hover:text-primary">Booked Rooms</Link>
+              <Link to="/dashboard/my-bookings" className="text-sm font-medium hover:text-primary">My Bookings</Link>
+              <Link to="/dashboard/assistant" className="text-sm font-medium hover:text-primary">🤖 Assistant</Link>
               {user.role === "superadmin" && (
                 <>
-                  <Link to="/dashboard/room-management" className="text-sm font-medium hover:text-primary">
-                    Room Management
-                  </Link>
-                  <Link to="/dashboard/user-management" className="text-sm font-medium hover:text-primary">
-                    User Management
-                  </Link>
+                  <Link to="/dashboard/room-management" className="text-sm font-medium hover:text-primary">Room Management</Link>
+                  <Link to="/dashboard/user-management" className="text-sm font-medium hover:text-primary">User Management</Link>
+                  <Link to="/dashboard/booking-management" className="text-sm font-medium hover:text-primary">Booking Management</Link>
                 </>
               )}
             </div>
             
-            {/* User Info - Desktop */}
             <div className="hidden md:flex items-center gap-4">
-              <span className="text-sm">
-                Hey, {user.first_name || user.email}! You're a {user.role}.
-              </span>
+              <span className="text-sm">Hey, {user.first_name || user.email}! You're a {user.role}.</span>
               <Link to="/dashboard/my-account">
-                <Button variant="ghost" size="icon">
-                  <UserCircle className="h-5 w-5" />
-                </Button>
+                <Button variant="ghost" size="icon"><UserCircle className="h-5 w-5" /></Button>
               </Link>
-              <Button variant="ghost" size="icon" onClick={handleLogout}>
-                <LogOut className="h-5 w-5" />
-              </Button>
+              <Button variant="ghost" size="icon" onClick={handleLogout}><LogOut className="h-5 w-5" /></Button>
             </div>
 
-            {/* User Info - Mobile */}
             <div className="md:hidden">
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Menu className="h-5 w-5" />
-                  </Button>
+                  <Button variant="ghost" size="icon"><Menu className="h-5 w-5" /></Button>
                 </SheetTrigger>
                 <SheetContent>
                   <div className="py-4">
-                    <p className="text-sm">
-                      Hey, {user.first_name || user.email}!
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      You're a {user.role}
-                    </p>
+                    <p className="text-sm">Hey, {user.first_name || user.email}!</p>
+                    <p className="text-sm text-muted-foreground">You're a {user.role}</p>
                     <div className="mt-4">
-                      <Link to="/dashboard/my-account" className="text-sm font-medium hover:text-primary block py-2">
-                        My Account
-                      </Link>
+                      <Link to="/dashboard/my-account" className="text-sm font-medium hover:text-primary block py-2">My Account</Link>
+                      <Link to="/dashboard/assistant" className="text-sm font-medium hover:text-primary block py-2">🤖 Assistant</Link>
                       {user.role === "superadmin" && (
                         <>
-                          <Link to="/dashboard/room-management" className="text-sm font-medium hover:text-primary block py-2">
-                            Room Management
-                          </Link>
-                          <Link to="/dashboard/user-management" className="text-sm font-medium hover:text-primary block py-2">
-                            User Management
-                          </Link>
+                          <Link to="/dashboard/room-management" className="text-sm font-medium hover:text-primary block py-2">Room Management</Link>
+                          <Link to="/dashboard/user-management" className="text-sm font-medium hover:text-primary block py-2">User Management</Link>
+                          <Link to="/dashboard/booking-management" className="text-sm font-medium hover:text-primary block py-2">Booking Management</Link>
                         </>
                       )}
-                      <button
-                        onClick={handleLogout}
-                        className="text-sm font-medium hover:text-primary block py-2 w-full text-left"
-                      >
-                        Sign Out
-                      </button>
+                      <button onClick={handleLogout} className="text-sm font-medium hover:text-primary block py-2 w-full text-left">Sign Out</button>
                     </div>
                   </div>
                 </SheetContent>
@@ -145,6 +108,7 @@ export const AppContent = () => {
           <Route path="/my-account" element={<MyAccount />} />
           <Route path="/room-management" element={<RoomManagement />} />
           <Route path="/user-management" element={<UserManagement />} />
+          <Route path="/booking-management" element={<BookingManagement />} />
           <Route path="/assistant" element={<BookingAssistant />} />
         </Routes>
       </main>
