@@ -9,12 +9,14 @@ interface RoomCardProps {
   name: string;
   description: string;
   capacity: number;
-  image_url: string; // Changed from imageUrl to match Supabase schema
+  image_url: string;
   amenities: string[];
+  photo_url?: string | null;
 }
 
-export function RoomCard({ name, description, capacity, image_url, amenities }: RoomCardProps) {
-  
+export function RoomCard({ name, description, capacity, image_url, amenities, photo_url }: RoomCardProps) {
+  const displayImage = photo_url || image_url;
+
   const amenityIcons = {
     wifi: <Wifi className="amenity-icon" aria-label="WiFi available" />,
     coffee: <Coffee className="amenity-icon" aria-label="Coffee machine available" />,
@@ -25,12 +27,10 @@ export function RoomCard({ name, description, capacity, image_url, amenities }: 
     <Card className="room-card overflow-hidden" role="article" aria-label={`Meeting room: ${name}`}>
       <div className="aspect-video relative overflow-hidden">
         <img
-          src={image_url}
+          src={displayImage}
           alt={`Interior view of ${name}`}
           className="object-cover w-full h-full hover:scale-105 transition-transform duration-300"
-          onError={(e) => {
-            e.currentTarget.src = "/placeholder.svg";
-          }}
+          onError={(e) => { e.currentTarget.src = "/placeholder.svg"; }}
         />
       </div>
       <CardHeader>
@@ -48,11 +48,7 @@ export function RoomCard({ name, description, capacity, image_url, amenities }: 
       <CardContent>
         <div className="flex gap-2" role="list" aria-label="Room amenities">
           {amenities.map((amenity) => (
-            <div 
-              key={amenity} 
-              className="flex items-center gap-1"
-              role="listitem"
-            >
+            <div key={amenity} className="flex items-center gap-1" role="listitem">
               {amenityIcons[amenity as keyof typeof amenityIcons]}
             </div>
           ))}

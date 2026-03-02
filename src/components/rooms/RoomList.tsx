@@ -1,23 +1,11 @@
 import { Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 interface RoomListProps {
@@ -32,6 +20,7 @@ const RoomList = ({ rooms, onEdit, onDelete }: RoomListProps) => {
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>Photo</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Capacity</TableHead>
             <TableHead>Amenities</TableHead>
@@ -41,42 +30,33 @@ const RoomList = ({ rooms, onEdit, onDelete }: RoomListProps) => {
         <TableBody>
           {rooms.map((room) => (
             <TableRow key={room.id}>
+              <TableCell>
+                {room.photo_url ? (
+                  <img src={room.photo_url} alt={room.name} className="w-16 h-12 object-cover rounded" />
+                ) : (
+                  <div className="w-16 h-12 bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">No photo</div>
+                )}
+              </TableCell>
               <TableCell className="font-medium">{room.name}</TableCell>
               <TableCell>{room.capacity} people</TableCell>
-              <TableCell>
-                {room.amenities?.join(", ") || "No amenities"}
-              </TableCell>
+              <TableCell>{room.amenities?.join(", ") || "No amenities"}</TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onEdit(room)}
-                  >
+                  <Button variant="ghost" size="icon" onClick={() => onEdit(room)}>
                     <Edit className="h-4 w-4" />
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4" /></Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
                         <AlertDialogTitle>Delete Room</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete this room? This action
-                          cannot be undone.
-                        </AlertDialogDescription>
+                        <AlertDialogDescription>Are you sure you want to delete this room? This action cannot be undone.</AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => onDelete(room.id)}
-                          className="bg-destructive text-destructive-foreground"
-                        >
-                          Delete
-                        </AlertDialogAction>
+                        <AlertDialogAction onClick={() => onDelete(room.id)} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
