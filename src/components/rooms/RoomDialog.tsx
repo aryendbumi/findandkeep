@@ -14,7 +14,7 @@ interface RoomDialogProps {
 
 const RoomDialog = ({ open, onOpenChange, room, onSuccess }: RoomDialogProps) => {
   const [defaultValues, setDefaultValues] = useState<RoomFormData>({
-    name: "", description: "", capacity: 1, amenities: "",
+    name: "", location: "", capacity: 1, amenities: [],
   });
 
   const { handleRoomSubmit, isSubmitting } = useRoomOperations(onSuccess);
@@ -23,12 +23,12 @@ const RoomDialog = ({ open, onOpenChange, room, onSuccess }: RoomDialogProps) =>
     if (room) {
       setDefaultValues({
         name: room.name,
-        description: room.description || "",
+        location: room.location || "",
         capacity: room.capacity,
-        amenities: room.amenities?.join(", ") || "",
+        amenities: room.amenities || [],
       });
     } else {
-      setDefaultValues({ name: "", description: "", capacity: 1, amenities: "" });
+      setDefaultValues({ name: "", location: "", capacity: 1, amenities: [] });
     }
   }, [room]);
 
@@ -38,11 +38,12 @@ const RoomDialog = ({ open, onOpenChange, room, onSuccess }: RoomDialogProps) =>
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle>{room ? "Edit Room" : "Add Room"}</DialogTitle>
         </DialogHeader>
         <RoomForm
+          key={room?.id ?? "new"}
           defaultValues={defaultValues}
           onSubmit={onSubmit}
           onCancel={() => onOpenChange(false)}

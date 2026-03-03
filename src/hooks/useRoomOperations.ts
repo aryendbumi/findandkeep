@@ -6,13 +6,8 @@ import type { RoomFormData } from "@/components/rooms/RoomForm";
 const MAX_AMENITY_LENGTH = 50;
 const MAX_AMENITIES_COUNT = 20;
 
-function sanitizeAmenities(amenitiesString: string): string[] {
-  if (!amenitiesString || !amenitiesString.trim()) {
-    return [];
-  }
-
-  return amenitiesString
-    .split(",")
+function sanitizeAmenities(amenities: string[]): string[] {
+  return amenities
     .map((item) => item.trim())
     .filter((item) => item.length > 0)
     .slice(0, MAX_AMENITIES_COUNT)
@@ -39,7 +34,7 @@ export function useRoomOperations(onSuccess: () => void) {
   const handleRoomSubmit = async (values: RoomFormData, roomId?: number, photoFile?: File | null) => {
     setIsSubmitting(true);
     try {
-      const amenitiesArray = sanitizeAmenities(values.amenities || "");
+      const amenitiesArray = sanitizeAmenities(values.amenities || []);
 
       let photoUrl: string | undefined;
       if (photoFile) {
@@ -48,7 +43,7 @@ export function useRoomOperations(onSuccess: () => void) {
 
       const roomData: any = {
         name: values.name,
-        description: values.description,
+        location: values.location || null,
         capacity: values.capacity,
         amenities: amenitiesArray,
       };

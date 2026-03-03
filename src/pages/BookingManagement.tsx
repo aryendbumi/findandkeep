@@ -15,11 +15,19 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Popover, PopoverContent, PopoverTrigger,
+} from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Edit } from "lucide-react";
-import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Badge } from "@/components/ui/badge";
+import { Trash2, Edit, CalendarIcon } from "lucide-react";
+import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, addWeeks } from "date-fns";
+import { cn } from "@/lib/utils";
+
+type DateFilter = "all" | "today" | "this_week" | "next_week" | "custom";
 
 interface BookingRow {
   id: string;
@@ -33,27 +41,55 @@ interface BookingRow {
   created_at: string;
 }
 
+function getDateRange(filter: DateFilter, customDate?: Date): { from: string; to: string } | null {
+  const now = new Date();
+  switch (filter) {
+    case "today":
+      return { from: startOfDay(now).toISOString(), to: endOfDay(now).toISOString() };
+    case "this_week":
+      return { from: startOfWeek(now, { weekStartsOn: 1 }).toISOString(), to: endOfWeek(now, { weekStartsOn: 1 }).toISOString() };
+    case "next_week": {
+      const next = addWeeks(now, 1);
+      return { from: startOfWeek(next, { weekStartsOn: 1 }).toISOString(), to: endOfWeek(next, { weekStartsOn: 1 }).toISOString() };
+    }
+    case "custom":
+      if (customDate) return { from: startOfDay(customDate).toISOString(), to: endOfDay(customDate).toISOString() };
+      return null;
+    default:
+      return null;
+  }
+}
+
 export default function BookingManagement() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [editingBooking, setEditingBooking] = useState<BookingRow | null>(null);
   const [editForm, setEditForm] = useState({ title: "", description: "", priority: "medium" });
+  const [dateFilter, setDateFilter] = useState<DateFilter>("all");
+  const [customDate, setCustomDate] = useState<Date | undefined>();
+
+  const dateRange = getDateRange(dateFilter, customDate);
 
   const { data: bookings = [], isLoading } = useQuery({
-    queryKey: ["all-bookings-admin"],
+    queryKey: ["all-bookings-admin", dateFilter, customDate?.toISOString()],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("bookings")
         .select("*")
         .order("start_time", { ascending: false });
+
+      if (dateRange) {
+        query = query.gte("start_time", dateRange.from).lte("start_time", dateRange.to);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
 
-      // Fetch room names and user names
       const roomIds = [...new Set(data.map((b: BookingRow) => b.room_id))];
       const userIds = [...new Set(data.map((b: BookingRow) => b.user_id))];
 
-      const { data: rooms } = await supabase.from("rooms").select("id, name").in("id", roomIds);
-      const { data: profiles } = await supabase.from("profile_directory").select("id, first_name, last_name").in("id", userIds);
+      const { data: rooms } = roomIds.length ? await supabase.from("rooms").select("id, name").in("id", roomIds) : { data: [] };
+      const { data: profiles } = userIds.length ? await supabase.from("profile_directory").select("id, first_name, last_name").in("id", userIds) : { data: [] };
 
       const roomMap = new Map((rooms ?? []).map((r: any) => [r.id, r.name]));
       const profileMap = new Map((profiles ?? []).map((p: any) => [p.id, `${p.first_name || ""} ${p.last_name || ""}`.trim() || "Unknown"]));
@@ -112,11 +148,53 @@ export default function BookingManagement() {
     );
   }
 
+  const filterButtons: { label: string; value: DateFilter }[] = [
+    { label: "All", value: "all" },
+    { label: "Today", value: "today" },
+    { label: "This Week", value: "this_week" },
+    { label: "Next Week", value: "next_week" },
+  ];
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Booking Management</h1>
         <p className="text-muted-foreground">View, edit, or delete any booking across all users.</p>
+      </div>
+
+      {/* Date Filters */}
+      <div className="flex flex-wrap items-center gap-2 mb-6">
+        {filterButtons.map((f) => (
+          <Badge
+            key={f.value}
+            variant={dateFilter === f.value ? "default" : "outline"}
+            className="cursor-pointer select-none px-3 py-1.5 text-sm transition-colors"
+            onClick={() => { setDateFilter(f.value); setCustomDate(undefined); }}
+          >
+            {f.label}
+          </Badge>
+        ))}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant={dateFilter === "custom" ? "default" : "outline"}
+              size="sm"
+              className="gap-2"
+            >
+              <CalendarIcon className="h-4 w-4" />
+              {dateFilter === "custom" && customDate ? format(customDate, "MMM d, yyyy") : "Pick Date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={customDate}
+              onSelect={(d) => { setCustomDate(d); setDateFilter("custom"); }}
+              initialFocus
+              className={cn("p-3 pointer-events-auto")}
+            />
+          </PopoverContent>
+        </Popover>
       </div>
 
       <Card>
