@@ -1,5 +1,6 @@
 import { Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -39,7 +40,17 @@ const RoomList = ({ rooms, onEdit, onDelete }: RoomListProps) => {
               </TableCell>
               <TableCell className="font-medium">{room.name}</TableCell>
               <TableCell>{room.capacity} people</TableCell>
-              <TableCell>{room.amenities?.join(", ") || "No amenities"}</TableCell>
+              <TableCell>
+                {room.amenities?.length > 0 ? (
+                  <div className="flex flex-wrap gap-1">
+                    {room.amenities.map((a: string) => (
+                      <Badge key={a} variant="secondary" className="text-xs">{a}</Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground text-sm">No amenities</span>
+                )}
+              </TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
                   <Button variant="ghost" size="icon" onClick={() => onEdit(room)}>
